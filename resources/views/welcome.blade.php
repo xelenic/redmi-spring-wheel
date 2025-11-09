@@ -37,17 +37,17 @@
                             <div
                                 class="wheel"
                                 data-wheel
-                                data-segments='["Balloon","Bonus Spin","Ice Cream","Try Again","Mystery Gift","Coffee Voucher","VIP Pass","Lucky Draw"]'
+                                data-segments='["Heart","Try Again","T-Shirt","Try Again","Ice Cream","Balloon","Try Again","Cap"]'
                             >
                                 @foreach ([
-                                    'Balloon',
-                                    'Bonus Spin',
-                                    'Ice Cream',
+                                    'Heart',
                                     'Try Again',
-                                    'Mystery Gift',
-                                    'Coffee Voucher',
-                                    'VIP Pass',
-                                    'Lucky Draw',
+                                    'T-Shirt',
+                                    'Try Again',
+                                    'Ice Cream',
+                                    'Balloon',
+                                    'Try Again',
+                                    'Cap',
                                 ] as $index => $label)
                                     <div class="wheel__label" style="--index: {{ $index }}">
                                         <span>{{ $label }}</span>

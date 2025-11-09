@@ -300,7 +300,6 @@ body {
     border-radius: 50%;
     transform-origin: center center;
     transform: rotate(var(--rotation, 0deg));
-    transition: transform 4.2s cubic-bezier(0.14, 0.88, 0.12, 1.05);
     overflow: hidden;
     z-index: 0;
 }

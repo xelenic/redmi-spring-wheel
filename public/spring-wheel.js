@@ -37,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const segments = (wheelElement.dataset.segments && JSON.parse(wheelElement.dataset.segments)) || [];
     const segmentCount = segments.length || 8;
     const segmentAngle = 360 / segmentCount;
+    const spinDuration = 4200;
 
     let rotation = 0;
     let spinning = false;
@@ -70,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const calculateIndex = (currentRotation) => {
         const normalized = ((currentRotation % 360) + 360) % 360;
-        const relative = (360 - normalized) % 360;
+        const relative = (360 - normalized + segmentAngle / 2) % 360;
         return Math.floor(relative / segmentAngle) % segmentCount;
     };
 
@@ -100,18 +101,27 @@ document.addEventListener('DOMContentLoaded', () => {
         spinButton.disabled = true;
         wheelElement.classList.add('is-spinning');
 
-        const extraSpins = 4 + Math.random() * 3;
-        const randomOffset = Math.random() * 360;
-        rotation += extraSpins * 360 + randomOffset;
+        const currentNormalized = ((rotation % 360) + 360) % 360;
+        rotation = currentNormalized;
 
+        wheelElement.style.transition = 'none';
         wheelElement.style.setProperty('--rotation', `${rotation}deg`);
 
-        const transitionDuration = 4200;
+        window.requestAnimationFrame(() => {
+            wheelElement.style.transition = `transform ${spinDuration}ms cubic-bezier(0.22, 0.9, 0.15, 1)`;
+
+            const extraSpins = 4 + Math.random() * 3;
+            const randomOffset = Math.random() * 360;
+            rotation += extraSpins * 360 + randomOffset;
+
+            wheelElement.style.setProperty('--rotation', `${rotation}deg`);
+        });
 
         window.setTimeout(() => {
             spinning = false;
             spinButton.disabled = false;
             wheelElement.classList.remove('is-spinning');
+            wheelElement.style.transition = 'none';
 
             const index = calculateIndex(rotation);
             const selection = segments[index] || `Reward ${index + 1}`;
@@ -119,6 +129,6 @@ document.addEventListener('DOMContentLoaded', () => {
             renderHistory(selection);
             showStep('result');
             activateCelebration();
-        }, transitionDuration);
+        }, spinDuration);
     });
 });
