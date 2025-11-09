@@ -1,15 +1,40 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const wheel = document.querySelector('[data-wheel]');
+    const wheelElement = document.querySelector('[data-wheel]');
     const spinButton = document.querySelector('[data-spin]');
     const resultLabel = document.querySelector('[data-result]');
     const historyList = document.querySelector('[data-history]');
     const highlightCard = document.querySelector('[data-highlight]');
+    const startButton = document.querySelector('[data-start]');
+    const repeatButton = document.querySelector('[data-repeat]');
+    const steps = {
+        intro: document.querySelector('[data-step="intro"]'),
+        wheel: document.querySelector('[data-step="wheel"]'),
+        result: document.querySelector('[data-step="result"]'),
+    };
 
-    if (!wheel || !spinButton || !resultLabel) {
+    if (!wheelElement || !spinButton || !resultLabel) {
         return;
     }
 
-    const segments = (wheel.dataset.segments && JSON.parse(wheel.dataset.segments)) || [];
+    const showStep = (key) => {
+        Object.entries(steps).forEach(([name, element]) => {
+            if (!element) {
+                return;
+            }
+
+            if (name === key) {
+                element.classList.add('is-active');
+                element.setAttribute('aria-hidden', 'false');
+            } else {
+                element.classList.remove('is-active');
+                element.setAttribute('aria-hidden', 'true');
+            }
+        });
+    };
+
+    showStep('intro');
+
+    const segments = (wheelElement.dataset.segments && JSON.parse(wheelElement.dataset.segments)) || [];
     const segmentCount = segments.length || 8;
     const segmentAngle = 360 / segmentCount;
 
@@ -49,6 +74,23 @@ document.addEventListener('DOMContentLoaded', () => {
         return Math.floor(relative / segmentAngle) % segmentCount;
     };
 
+    startButton?.addEventListener('click', () => {
+        if (spinning) {
+            return;
+        }
+
+        showStep('wheel');
+    });
+
+    repeatButton?.addEventListener('click', () => {
+        if (spinning) {
+            return;
+        }
+
+        resultLabel.textContent = '—';
+        showStep('wheel');
+    });
+
     spinButton.addEventListener('click', () => {
         if (spinning) {
             return;
@@ -56,25 +98,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
         spinning = true;
         spinButton.disabled = true;
-        wheel.classList.add('is-spinning');
+        wheelElement.classList.add('is-spinning');
 
         const extraSpins = 4 + Math.random() * 3;
         const randomOffset = Math.random() * 360;
         rotation += extraSpins * 360 + randomOffset;
 
-        wheel.style.setProperty('--rotation', `${rotation}deg`);
+        wheelElement.style.setProperty('--rotation', `${rotation}deg`);
 
         const transitionDuration = 4200;
 
         window.setTimeout(() => {
             spinning = false;
             spinButton.disabled = false;
-            wheel.classList.remove('is-spinning');
+            wheelElement.classList.remove('is-spinning');
 
             const index = calculateIndex(rotation);
             const selection = segments[index] || `Reward ${index + 1}`;
             resultLabel.textContent = selection;
             renderHistory(selection);
+            showStep('result');
             activateCelebration();
         }, transitionDuration);
     });
