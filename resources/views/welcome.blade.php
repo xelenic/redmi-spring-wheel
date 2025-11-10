@@ -25,11 +25,16 @@
 
                         <img src="{{ asset('spin/01/01_Button.png') }}" alt="Play" style="height: 15vh;margin-top: 30vh;" data-start>
 
-                    
+
                     </div>
                 </section>
 
                 <section class="step step--wheel" data-step="wheel">
+                    <img
+                    src="{{ asset('spin/01/01_Logo.png') }}"
+                    alt="Redmi Spring Wheel"
+                    class="intro__logo" style="height: 14vh;"
+                >
                     <div class="wheel-stage">
                         <div class="wheel-wrapper">
                             <div class="pointer" aria-hidden="true"></div>
