@@ -295,8 +295,51 @@ body {
     gap: clamp(18px, 3vh, 26px);
 }
 
+.result-banner {
+    width: 100%;
+    max-width: clamp(320px, 68vw, 760px);
+    height: auto;
+    display: block;
+    filter: drop-shadow(0 32px 48px rgba(0, 0, 0, 0.45));
+}
+
 .result-wrapper .status-panel {
     min-width: clamp(320px, 48vw, 560px);
+}
+
+.result-repeat-button {
+    appearance: none;
+    border: 0;
+    background: none;
+    padding: 0;
+    cursor: pointer;
+    width: clamp(220px, 42vh, 420px);
+    transition: transform 0.16s ease, filter 0.16s ease, opacity 0.16s ease;
+}
+
+.result-repeat-button img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.result-repeat-button:hover,
+.result-repeat-button:focus-visible {
+    transform: translateY(-4px) scale(1.02);
+}
+
+.result-repeat-button:active {
+    transform: translateY(0) scale(0.97);
+}
+
+.result-repeat-button:disabled {
+    opacity: 0.58;
+    cursor: not-allowed;
+    filter: none;
+}
+
+.result-repeat-button:disabled img {
+    filter: grayscale(0.35);
 }
 
 .wheel-wrapper::before {

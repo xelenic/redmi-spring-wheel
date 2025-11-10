@@ -65,17 +65,20 @@
 
                 <section class="step step--result" data-step="result">
                     <div class="result-wrapper">
-                        <section class="status-panel" aria-live="polite">
-                            <div class="status-current" data-highlight>
-                                <span class="status-label">Current Reward</span>
-                                <span class="status-value" data-result>—</span>
-                            </div>
-                            <div class="status-history">
-                                <span class="status-label">Recent Winners</span>
-                                <ul class="history-list" data-history></ul>
-                            </div>
-                        </section>
-                        <button type="button" class="cta-button cta-button--ghost" data-repeat>Play Again</button>
+                        <img
+                            src="{{ asset('spin/03/Congratulations.png') }}"
+                            alt="Congratulations"
+                            class="result-banner" style="width: 40vh;margin-bottom: 3vh;"
+                        >
+                        <div class="status-current" data-highlight >
+                            <span style="font-size: 5vh;" class="status-value" data-result>—</span>
+                        </div>
+                        <div class="status-history" style="display: none">
+                            <span class="status-label">Recent Winners</span>
+                            <ul class="history-list" data-history></ul>
+                        </div>
+
+                        <img src="{{ asset('spin/03/03_Button.png') }}" alt="Play Again" data-repeat style="width: 27vh;margin-top: 14vh;">
                     </div>
                 </section>
             </div>
