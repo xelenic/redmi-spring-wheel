@@ -12,21 +12,20 @@
 <body>
     <div class="screen">
         <div class="surface">
-            <header class="brand" aria-label="Brand">
-                <div class="brand__row">
-                    <span class="brand__logo">mi</span>
-                    <span class="brand__divider" aria-hidden="true"></span>
-                    <span class="brand__partner">Abans</span>
-                </div>
-                <h1>Lucky Wheel</h1>
-            </header>
 
             <div class="stepper">
                 <section class="step step--intro is-active" data-step="intro">
-                    <div class="intro">
-                        <h2 class="intro__title">Ready to Play?</h2>
-                        <p class="intro__text">Tap play to enter the spring wheel and unlock a surprise reward.</p>
-                        <button type="button" class="cta-button" data-start>Play</button>
+                    <div class="intro intro--step-one">
+                        <img
+                            src="{{ asset('spin/01/01_Logo.png') }}"
+                            alt="Redmi Spring Wheel"
+                            class="intro__logo" style="height: 14vh;"
+                        >
+
+
+                        <img src="{{ asset('spin/01/01_Button.png') }}" alt="Play" style="height: 15vh;margin-top: 30vh;" data-start>
+
+                    
                     </div>
                 </section>
 

@@ -156,6 +156,48 @@ body {
     gap: clamp(18px, 3.2vh, 28px);
 }
 
+.intro--step-one {
+    width: 100%;
+    max-width: clamp(320px, 72vw, 720px);
+    margin: 0 auto;
+    gap: clamp(32px, 6vh, 52px);
+}
+
+.intro__logo {
+    width: 100%;
+    max-width: clamp(260px, 58vw, 540px);
+    height: auto;
+    display: block;
+    filter: drop-shadow(0 28px 48px rgba(0, 0, 0, 0.45));
+}
+
+.intro__play-button {
+    appearance: none;
+    border: 0;
+    background: none;
+    padding: 0;
+    cursor: pointer;
+    width: 100%;
+    max-width: clamp(220px, 48vw, 420px);
+    transition: transform 0.18s ease, filter 0.18s ease;
+}
+
+.intro__play-button img {
+    display: block;
+    width: 100%;
+    height: auto;
+    filter: drop-shadow(0 24px 40px rgba(255, 120, 0, 0.45));
+}
+
+.intro__play-button:hover,
+.intro__play-button:focus-visible {
+    transform: translateY(-4px) scale(1.02);
+}
+
+.intro__play-button:active {
+    transform: translateY(0) scale(0.97);
+}
+
 .intro__title {
     margin: 0;
     font-size: clamp(32px, 6vh, 56px);
