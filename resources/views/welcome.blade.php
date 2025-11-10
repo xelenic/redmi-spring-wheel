@@ -10,6 +10,24 @@
     <link rel="stylesheet" href="{{ asset('spring-wheel.css') }}">
 </head>
 <body>
+    <div class="preloader" data-preloader>
+        <div class="preloader__inner" role="status" aria-live="polite">
+            <img
+                src="{{ asset('spin/01/01_Logo.png') }}"
+                alt="Loading Redmi Spring Wheel"
+                class="preloader__logo"
+            >
+            <p class="preloader__message" data-preloader-note>Preparing your experience…</p>
+            <div class="preloader__track" aria-hidden="true">
+                <div class="preloader__progress" data-preloader-progress></div>
+            </div>
+            <p class="preloader__count">
+                <span data-preloader-count>0</span>
+                /
+                <span data-preloader-total>0</span>
+            </p>
+        </div>
+    </div>
     <div class="screen">
         <div class="surface">
 
