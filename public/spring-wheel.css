@@ -34,6 +34,80 @@ body {
     color: var(--text-primary);
 }
 
+.preloader {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(180deg, rgba(24, 4, 0, 0.92) 0%, rgba(8, 1, 0, 0.96) 100%);
+    z-index: 9999;
+    transition: opacity 0.45s ease, visibility 0.45s ease;
+}
+
+.preloader::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 35%, rgba(255, 130, 20, 0.35) 0%, transparent 62%);
+    pointer-events: none;
+}
+
+.preloader.is-hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.preloader__inner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(12px, 3vh, 22px);
+    text-align: center;
+}
+
+.preloader__logo {
+    width: clamp(120px, 32vw, 220px);
+    height: auto;
+    filter: drop-shadow(0 24px 48px rgba(0, 0, 0, 0.45));
+}
+
+.preloader__message {
+    margin: 0;
+    font-weight: 600;
+    font-size: clamp(16px, 2.6vh, 20px);
+    letter-spacing: 0.06em;
+    color: rgba(255, 248, 241, 0.86);
+}
+
+.preloader__track {
+    width: clamp(200px, 48vw, 360px);
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
+    overflow: hidden;
+}
+
+.preloader__progress {
+    width: 100%;
+    height: 100%;
+    background: var(--brand-highlight);
+    transform-origin: left center;
+    transform: scaleX(0);
+    transition: transform 0.24s ease-out;
+}
+
+.preloader__count {
+    margin: 0;
+    font-size: clamp(14px, 2.4vh, 18px);
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: rgba(255, 245, 230, 0.72);
+}
+
 .screen {
     position: relative;
     width: auto;
