@@ -58,7 +58,7 @@
                                     </div>
                                 @endforeach
                             </div>
-                            <button type="button" class="spin-button" data-spin>Spin</button>
+                            <img src="{{ asset('spin/02/02_Button.png') }}"  data-spin aria-label="Spin the wheel" alt="" style="width: 40vh;z-index: 1;margin-top: 7vh;">
                         </div>
                     </div>
                 </section>
