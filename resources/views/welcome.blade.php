@@ -746,7 +746,8 @@
                             class="result-banner" style="width: 40vh;margin-bottom: 3vh;"
                         >
                         <div class="status-current" data-highlight >
-                            <span style="font-size: 5vh;" class="status-value" data-result>—</span>
+                            <span style="display: none" style="font-size: 5vh;" class="status-value" data-result>—</span>
+                            <img data-result-image alt="" style="display: none;max-height: 24vh;width: 604px;">
                         </div>
                         <div class="status-history" style="display: none">
                             <span class="status-label">Recent Winners</span>
@@ -765,6 +766,7 @@
             const wheelElement = document.querySelector('[data-wheel]');
             const spinButton = document.querySelector('[data-spin]');
             const resultLabel = document.querySelector('[data-result]');
+            const resultImage = document.querySelector('[data-result-image]');
             const historyList = document.querySelector('[data-history]');
             const highlightCard = document.querySelector('[data-highlight]');
             const startButton = document.querySelector('[data-start]');
@@ -899,6 +901,38 @@
 
             showStep('intro');
 
+            @php
+                $prizeImages = [
+                    'water bottle' => asset('spin/gifts/Water Bottle.png'),
+                    'ice cream' => asset('spin/gifts/ice_cream.png'),
+                    'try again' => asset('spin/03/better luck next time.png'),
+                    't shirt' => asset('spin/gifts/T-SHIRT.png'),
+                    'mug' => asset('spin/gifts/MUG.png'),
+                    'umbrella' => asset('spin/gifts/umbrella.png'),
+                    'cap' => asset('spin/gifts/CAP.png'),
+                ];
+            @endphp
+
+            const prizeImages = Object.freeze(@json($prizeImages));
+
+            const updateResultImage = (selection) => {
+                if (!resultImage) {
+                    return;
+                }
+
+                const imageSrc = prizeImages[selection.trim().toLowerCase()] ?? null;
+
+                if (imageSrc) {
+                    resultImage.src = imageSrc;
+                    resultImage.alt = selection;
+                    resultImage.style.display = 'block';
+                } else {
+                    resultImage.removeAttribute('src');
+                    resultImage.alt = '';
+                    resultImage.style.display = 'none';
+                }
+            };
+
             const segments = (wheelElement.dataset.segments && JSON.parse(wheelElement.dataset.segments)) || [];
             const segmentCount = segments.length || 8;
             const segmentAngle = 360 / segmentCount;
@@ -954,6 +988,7 @@
                 }
 
                 resultLabel.textContent = '—';
+                updateResultImage('—');
                 showStep('wheel');
             });
 
@@ -991,6 +1026,7 @@
                     const index = calculateIndex(rotation);
                     const selection = segments[index] || `Reward ${index + 1}`;
                     resultLabel.textContent = selection;
+                    updateResultImage(selection);
                     renderHistory(selection);
                     showStep('result');
                     activateCelebration();

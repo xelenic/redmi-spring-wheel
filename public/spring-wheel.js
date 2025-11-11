@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const wheelElement = document.querySelector('[data-wheel]');
     const spinButton = document.querySelector('[data-spin]');
     const resultLabel = document.querySelector('[data-result]');
+    const resultImage = document.querySelector('[data-result-image]');
     const historyList = document.querySelector('[data-history]');
     const highlightCard = document.querySelector('[data-highlight]');
     const startButton = document.querySelector('[data-start]');
@@ -136,6 +137,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
     showStep('intro');
 
+    const prizeImages = Object.freeze({
+        'water bottle': 'spin/gifts/Water Bottle.png',
+        'ice cream': 'spin/gifts/ice_cream.png',
+        'try again': 'spin/03/better luck next time.png',
+        't shirt': 'spin/gifts/T-SHIRT.png',
+        'mug': 'spin/gifts/MUG.png',
+        'umbrella': 'spin/umbrella.png',
+        'cap': 'spin/gifts/CAP.png',
+    });
+
+    const updateResultImage = (selection) => {
+        if (!resultImage) {
+            return;
+        }
+
+        const normalized = selection.trim().toLowerCase();
+        const relativeSrc = prizeImages[normalized] || null;
+
+        if (relativeSrc) {
+            const resolved = new URL(relativeSrc, window.location.origin).toString();
+            resultImage.src = resolved;
+            resultImage.alt = selection;
+            resultImage.style.display = 'block';
+        } else {
+            resultImage.removeAttribute('src');
+            resultImage.alt = '';
+            resultImage.style.display = 'none';
+        }
+    };
+
     const segments = (wheelElement.dataset.segments && JSON.parse(wheelElement.dataset.segments)) || [];
     const segmentCount = segments.length || 8;
     const segmentAngle = 360 / segmentCount;
@@ -191,6 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         resultLabel.textContent = '—';
+        updateResultImage('—');
         showStep('wheel');
     });
 
@@ -228,6 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const index = calculateIndex(rotation);
             const selection = segments[index] || `Reward ${index + 1}`;
             resultLabel.textContent = selection;
+            updateResultImage(selection);
             renderHistory(selection);
             showStep('result');
             activateCelebration();
