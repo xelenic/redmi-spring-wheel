@@ -744,6 +744,9 @@
                     <div class="result-wrapper">
                         <img
                             src="{{ asset('spin/03/Congratulations.png') }}"
+                            data-result-banner
+                            data-default-src="{{ asset('spin/03/Congratulations.png') }}"
+                            data-alt-src="{{ asset('spin/03/congrauations_an.png') }}"
                             alt="Congratulations"
                             class="result-banner" style="width: 40vh;margin-bottom: 3vh;"
                         >

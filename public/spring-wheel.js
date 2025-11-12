@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const spinButton = document.querySelector('[data-spin]');
     const resultLabel = document.querySelector('[data-result]');
     const resultImage = document.querySelector('[data-result-image]');
+    const resultBanner = document.querySelector('[data-result-banner]');
     const summaryList = document.querySelector('[data-summary-list]');
     const historyList = document.querySelector('[data-history]');
     const highlightCard = document.querySelector('[data-highlight]');
@@ -13,6 +14,13 @@ document.addEventListener('DOMContentLoaded', () => {
         wheel: document.querySelector('[data-step="wheel"]'),
         result: document.querySelector('[data-step="result"]'),
     };
+
+    const bannerSources = {
+        default: resultBanner?.dataset.defaultSrc ?? '',
+        alt: resultBanner?.dataset.altSrc ?? '',
+    };
+    const altBannerKeys = new Set(['ice-cream', 'umbrella']);
+    const hiddenBannerKeys = new Set(['try-again']);
 
     const preloaderElement = document.querySelector('[data-preloader]');
     const preloaderProgress = preloaderElement?.querySelector('[data-preloader-progress]');
@@ -29,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'spin/02/Wheel_2_Rotate.png',
         'spin/02/BG.jpg',
         'spin/03/Congratulations.png',
+        'spin/03/congrauations_an.png',
         'spin/03/03_Button.png',
         'spin/03/better luck next time.png',
         'spin/03/BG.jpg',
@@ -231,6 +240,44 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    const updateResultBanner = (key) => {
+        if (!resultBanner) {
+            return;
+        }
+
+        const normalizedKey = typeof key === 'string' ? key.toLowerCase() : '';
+
+        if (normalizedKey && hiddenBannerKeys.has(normalizedKey)) {
+            if (resultBanner.dataset.currentSrc !== 'hidden') {
+                resultBanner.removeAttribute('src');
+                resultBanner.dataset.currentSrc = 'hidden';
+            }
+            resultBanner.style.display = 'none';
+            return;
+        }
+
+        const shouldUseAlt = normalizedKey && altBannerKeys.has(normalizedKey);
+        const targetSrc = shouldUseAlt
+            ? (bannerSources.alt || bannerSources.default)
+            : bannerSources.default;
+
+        if (!targetSrc) {
+            resultBanner.removeAttribute('src');
+            resultBanner.dataset.currentSrc = '';
+            resultBanner.style.display = 'none';
+            return;
+        }
+
+        if (resultBanner.dataset.currentSrc === targetSrc) {
+            resultBanner.style.display = 'block';
+            return;
+        }
+
+        resultBanner.src = targetSrc;
+        resultBanner.dataset.currentSrc = targetSrc;
+        resultBanner.style.display = 'block';
+    };
+
     const mergeSummaryIntoSegments = (segmentsSource, summarySource) => {
         const summaryMap = new Map(
             Array.isArray(summarySource)
@@ -376,11 +423,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const initialImage = segment?.image ?? null;
 
         setResultState({ label: initialLabel, image: initialImage });
+        updateResultBanner(segment?.key ?? null);
         showStep('result');
         activateCelebration();
 
         if (!segment?.key) {
             setResultState({ label: initialLabel, image: initialImage });
+            updateResultBanner(null);
             renderHistory(initialLabel);
             return;
         }
@@ -394,6 +443,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const image = awarded?.image ?? initialImage;
 
             setResultState({ label: displayLabel, image });
+            updateResultBanner(awarded?.key ?? segment?.key ?? null);
 
             renderHistory(displayLabel);
 
@@ -405,6 +455,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('Unable to record spin', error);
             setResultState({ label: initialLabel, image: initialImage });
+            updateResultBanner(segment?.key ?? null);
             renderHistory(initialLabel);
             refreshFromApi();
             if (error?.message) {
@@ -415,6 +466,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const resetResult = () => {
         setResultState({ label: '—', image: null });
+        updateResultBanner(null);
     };
 
     const initialSegmentSource = parseJsonAttribute(wheelElement.dataset.segmentConfig, []);
