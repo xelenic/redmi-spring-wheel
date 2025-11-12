@@ -311,6 +311,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const spinDuration = 4200;
     let rotation = 0;
     let spinning = false;
+    let pendingSpinPayload = null;
 
     const setSegmentData = (data) => {
         segmentData = Array.isArray(data)
@@ -349,6 +350,60 @@ document.addEventListener('DOMContentLoaded', () => {
         return Math.floor(relative / segmentAngle) % Math.max(segmentCount, 1);
     };
 
+    const spinToSegment = (targetSegment) => {
+        if (spinning) {
+            return;
+        }
+
+        const currentNormalized = ((rotation % 360) + 360) % 360;
+        const targetIndex = typeof targetSegment?.index === 'number'
+            ? targetSegment.index % Math.max(segmentCount, 1)
+            : null;
+
+        spinning = true;
+        spinButton.disabled = true;
+        wheelElement.classList.add('is-spinning');
+
+        wheelElement.style.transition = 'none';
+        rotation = currentNormalized;
+        wheelElement.style.setProperty('--rotation', `${rotation}deg`);
+
+        window.requestAnimationFrame(() => {
+            wheelElement.style.transition = `transform ${spinDuration}ms cubic-bezier(0.22, 0.9, 0.15, 1)`;
+            const extraSpins = 4 + Math.floor(Math.random() * 3);
+
+            if (targetIndex !== null && segmentCount > 0) {
+                const normalizedTarget = (360 - (targetIndex * segmentAngle)) % 360;
+                const delta = normalizedTarget - currentNormalized;
+                rotation += extraSpins * 360 + delta;
+            } else {
+                const randomOffset = Math.random() * 360;
+                rotation += extraSpins * 360 + randomOffset;
+            }
+
+            wheelElement.style.setProperty('--rotation', `${rotation}deg`);
+        });
+
+        window.setTimeout(() => {
+            spinning = false;
+            spinButton.disabled = false;
+            wheelElement.classList.remove('is-spinning');
+            wheelElement.style.transition = 'none';
+
+            const landedIndex = calculateIndex(rotation);
+            const landedSegment = segmentData[landedIndex];
+            const preferredSegment = (typeof targetSegment?.index === 'number')
+                ? (segmentData.find((segment) => segment.index === targetSegment.index) ?? targetSegment ?? landedSegment)
+                : landedSegment;
+            const fallbackLabel = preferredSegment?.label
+                ?? landedSegment?.label
+                ?? segments[landedIndex]
+                ?? `Reward ${landedIndex + 1}`;
+
+            finalizeSpin(preferredSegment, fallbackLabel);
+        }, spinDuration);
+    };
+
     const renderHistory = (label) => {
         if (!historyList || !label) {
             return;
@@ -376,11 +431,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }, { once: true });
     };
 
-    const submitSpin = async (segmentKey) => {
-        if (!segmentKey) {
-            throw new Error('Missing prize key');
-        }
-
+    const submitSpin = async (segmentKey = null) => {
+        const payload = segmentKey ? { key: segmentKey } : {};
         const response = await fetch('/api/spins', {
             method: 'POST',
             headers: {
@@ -389,7 +441,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 'X-CSRF-TOKEN': csrfToken,
             },
             credentials: 'same-origin',
-            body: JSON.stringify({ key: segmentKey }),
+            body: JSON.stringify(payload),
         });
 
         if (response.ok) {
@@ -418,7 +470,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const finalizeSpin = async (segment, fallbackLabel) => {
+    const finalizeSpin = (segment, fallbackLabel) => {
+        const payload = pendingSpinPayload;
+        pendingSpinPayload = null;
+
         const initialLabel = segment?.label ?? fallbackLabel;
         const initialImage = segment?.image ?? null;
 
@@ -427,40 +482,31 @@ document.addEventListener('DOMContentLoaded', () => {
         showStep('result');
         activateCelebration();
 
-        if (!segment?.key) {
-            setResultState({ label: initialLabel, image: initialImage });
-            updateResultBanner(null);
+        if (!payload) {
             renderHistory(initialLabel);
+            refreshFromApi();
             return;
         }
 
-        try {
-            const payload = await submitSpin(segment.key);
-            const awarded = payload?.result ?? null;
-            const summary = payload?.summary ?? null;
+        const awarded = payload?.result ?? null;
+        const summary = payload?.summary ?? null;
+        const message = payload?.message ?? null;
+        const displayLabel = awarded?.label ?? initialLabel;
+        const image = awarded?.image ?? initialImage;
+        const bannerKey = awarded?.key ?? segment?.key ?? null;
 
-            const displayLabel = awarded?.label ?? initialLabel;
-            const image = awarded?.image ?? initialImage;
+        setResultState({ label: displayLabel, image });
+        updateResultBanner(bannerKey);
+        renderHistory(displayLabel);
 
-            setResultState({ label: displayLabel, image });
-            updateResultBanner(awarded?.key ?? segment?.key ?? null);
-
-            renderHistory(displayLabel);
-
-            if (Array.isArray(summary)) {
-                applyData(undefined, summary);
-            } else {
-                refreshFromApi();
-            }
-        } catch (error) {
-            console.error('Unable to record spin', error);
-            setResultState({ label: initialLabel, image: initialImage });
-            updateResultBanner(segment?.key ?? null);
-            renderHistory(initialLabel);
+        if (Array.isArray(summary)) {
+            applyData(undefined, summary);
+        } else {
             refreshFromApi();
-            if (error?.message) {
-                console.warn(error.message);
-            }
+        }
+
+        if (message) {
+            console.info(message);
         }
     };
 
@@ -493,42 +539,28 @@ document.addEventListener('DOMContentLoaded', () => {
         showStep('wheel');
     });
 
-    spinButton.addEventListener('click', () => {
+    spinButton.addEventListener('click', async () => {
         if (spinning) {
             return;
         }
 
-        spinning = true;
-        spinButton.disabled = true;
-        wheelElement.classList.add('is-spinning');
+        try {
+            spinButton.disabled = true;
+            const payload = await submitSpin();
+            pendingSpinPayload = payload;
 
-        const currentNormalized = ((rotation % 360) + 360) % 360;
-        rotation = currentNormalized;
+            const targetKey = payload?.result?.key ?? payload?.requested?.key ?? null;
+            const targetSegment = targetKey
+                ? segmentData.find((segment) => segment.key === targetKey) ?? null
+                : null;
 
-        wheelElement.style.transition = 'none';
-        wheelElement.style.setProperty('--rotation', `${rotation}deg`);
-
-        window.requestAnimationFrame(() => {
-            wheelElement.style.transition = `transform ${spinDuration}ms cubic-bezier(0.22, 0.9, 0.15, 1)`;
-
-            const extraSpins = 4 + Math.random() * 3;
-            const randomOffset = Math.random() * 360;
-            rotation += extraSpins * 360 + randomOffset;
-
-            wheelElement.style.setProperty('--rotation', `${rotation}deg`);
-        });
-
-        window.setTimeout(() => {
-            spinning = false;
+            spinToSegment(targetSegment);
+        } catch (error) {
+            console.error('Unable to initiate spin', error);
+            if (error?.message) {
+                console.warn(error.message);
+            }
             spinButton.disabled = false;
-            wheelElement.classList.remove('is-spinning');
-            wheelElement.style.transition = 'none';
-
-            const index = calculateIndex(rotation);
-            const fallbackLabel = segments[index] || `Reward ${index + 1}`;
-            const selectedSegment = segmentData[index];
-
-            finalizeSpin(selectedSegment, fallbackLabel);
-        }, spinDuration);
+        }
     });
 });

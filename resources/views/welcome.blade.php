@@ -764,7 +764,6 @@
             </div>
         </div>
     </div>
-
     <script src="{{ asset('spring-wheel.js') }}" defer></script>
 </body>
 </html>

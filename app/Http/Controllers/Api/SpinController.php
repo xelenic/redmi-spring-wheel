@@ -15,7 +15,7 @@ class SpinController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'key' => ['required', 'string', 'exists:prizes,key'],
+            'key' => ['nullable', 'string', 'exists:prizes,key'],
             'meta' => ['array'],
         ]);
 
@@ -23,10 +23,7 @@ class SpinController extends Controller
 
         $result = DB::transaction(function () use ($validated, $meta) {
             /** @var \App\Models\Prize $requestedPrize */
-            $requestedPrize = Prize::query()
-                ->where('key', $validated['key'])
-                ->lockForUpdate()
-                ->firstOrFail();
+            $requestedPrize = $this->resolveRequestedPrize($validated['key'] ?? null);
 
             $awardedPrize = $requestedPrize;
             $issued = true;
@@ -136,6 +133,60 @@ class SpinController extends Controller
         }
 
         return Prize::query()->where('key', $fallbackKey)->lockForUpdate()->first();
+    }
+
+    protected function resolveRequestedPrize(?string $key): Prize
+    {
+        if ($key !== null) {
+            return Prize::query()
+                ->where('key', $key)
+                ->lockForUpdate()
+                ->firstOrFail();
+        }
+
+        return $this->drawRandomPrize();
+    }
+
+    protected function drawRandomPrize(): Prize
+    {
+        $prizes = Prize::query()->lockForUpdate()->get();
+
+        if ($prizes->isEmpty()) {
+            abort(422, 'No prizes available.');
+        }
+
+        $eligible = $prizes
+            ->filter(fn (Prize $prize) => !$prize->isLimited() || ($prize->stock_remaining ?? 0) > 0)
+            ->values();
+
+        if ($eligible->isEmpty()) {
+            return $prizes->first();
+        }
+
+        $weights = $eligible->mapWithKeys(fn (Prize $prize) => [
+            $prize->key => $this->weightForPrize($prize),
+        ]);
+
+        $totalWeight = max(1, (int) $weights->sum());
+        $pick = random_int(1, $totalWeight);
+
+        foreach ($eligible as $prize) {
+            $pick -= max(1, $weights->get($prize->key, 1));
+            if ($pick <= 0) {
+                return $prize;
+            }
+        }
+
+        return $eligible->first();
+    }
+
+    protected function weightForPrize(Prize $prize): int
+    {
+        if ($prize->isLimited()) {
+            return max(1, (int) ($prize->stock_remaining ?? 0));
+        }
+
+        return max(1, (int) config("prizes.unlimited_weights.{$prize->key}", 1));
     }
 }
 
