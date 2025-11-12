@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const spinButton = document.querySelector('[data-spin]');
     const resultLabel = document.querySelector('[data-result]');
     const resultImage = document.querySelector('[data-result-image]');
+    const summaryList = document.querySelector('[data-summary-list]');
     const historyList = document.querySelector('[data-history]');
     const highlightCard = document.querySelector('[data-highlight]');
     const startButton = document.querySelector('[data-start]');
@@ -32,6 +33,8 @@ document.addEventListener('DOMContentLoaded', () => {
         'spin/03/better luck next time.png',
         'spin/03/BG.jpg',
     ];
+
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
 
     const hidePreloader = () => {
         if (!preloaderElement) {
@@ -119,6 +122,19 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
+    const parseJsonAttribute = (value, fallback) => {
+        if (!value) {
+            return fallback;
+        }
+
+        try {
+            return JSON.parse(value);
+        } catch (error) {
+            console.warn('Failed to parse JSON attribute', value, error);
+            return fallback;
+        }
+    };
+
     const showStep = (key) => {
         Object.entries(steps).forEach(([name, element]) => {
             if (!element) {
@@ -135,54 +151,165 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    showStep('intro');
-
-    const prizeImages = Object.freeze({
-        'water bottle': 'spin/gifts/Water Bottle.png',
-        'ice cream': 'spin/gifts/ice_cream.png',
-        'try again': 'spin/03/better luck next time.png',
-        't shirt': 'spin/gifts/T-SHIRT.png',
-        'mug': 'spin/gifts/MUG.png',
-        'umbrella': 'spin/umbrella.png',
-        'cap': 'spin/gifts/CAP.png',
-    });
-
-    const updateResultImage = (selection) => {
-        if (!resultImage) {
+    const renderWheelLabels = (data) => {
+        if (!wheelElement) {
             return;
         }
 
-        const normalized = selection.trim().toLowerCase();
-        const relativeSrc = prizeImages[normalized] || null;
+        wheelElement.querySelectorAll('.wheel__label').forEach((node) => node.remove());
 
-        if (relativeSrc) {
-            const resolved = new URL(relativeSrc, window.location.origin).toString();
-            resultImage.src = resolved;
-            resultImage.alt = selection;
-            resultImage.style.display = 'block';
-        } else {
-            resultImage.removeAttribute('src');
-            resultImage.alt = '';
-            resultImage.style.display = 'none';
+        const fragment = document.createDocumentFragment();
+
+        data.forEach((segment, index) => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'wheel__label';
+            wrapper.style.setProperty('--index', String(index));
+
+            const span = document.createElement('span');
+            span.textContent = segment.label;
+            wrapper.appendChild(span);
+
+            fragment.appendChild(wrapper);
+        });
+
+        wheelElement.appendChild(fragment);
+    };
+
+    const updateSummary = (summary) => {
+        if (!summaryList) {
+            return;
+        }
+
+        summaryList.innerHTML = '';
+
+        if (!Array.isArray(summary) || summary.length === 0) {
+            return;
+        }
+
+        const fragment = document.createDocumentFragment();
+
+        summary.forEach((item) => {
+            const issuedCount = item.total != null && item.remaining != null
+                ? Math.max(0, item.total - item.remaining)
+                : null;
+
+            const li = document.createElement('li');
+            li.className = 'summary-item';
+
+            const strong = document.createElement('strong');
+            strong.textContent = item.label;
+
+            const span = document.createElement('span');
+            if (issuedCount !== null) {
+                span.textContent = `${issuedCount} issued · ${item.remaining} left`;
+            } else {
+                span.textContent = 'Unlimited';
+            }
+
+            li.append(strong, span);
+            fragment.appendChild(li);
+        });
+
+        summaryList.appendChild(fragment);
+    };
+
+    const setResultState = ({ label = '—', image = null } = {}) => {
+        if (resultLabel) {
+            resultLabel.textContent = label;
+        }
+
+        if (resultImage) {
+            if (image) {
+                resultImage.src = image;
+                resultImage.alt = label;
+                resultImage.style.display = 'block';
+            } else {
+                resultImage.removeAttribute('src');
+                resultImage.alt = '';
+                resultImage.style.display = 'none';
+            }
         }
     };
 
-    const segments = (wheelElement.dataset.segments && JSON.parse(wheelElement.dataset.segments)) || [];
-    const segmentCount = segments.length || 8;
-    const segmentAngle = 360 / segmentCount;
-    const spinDuration = 4200;
+    const mergeSummaryIntoSegments = (segmentsSource, summarySource) => {
+        const summaryMap = new Map(
+            Array.isArray(summarySource)
+                ? summarySource.map((item) => [item.key, item])
+                : [],
+        );
 
+        return (Array.isArray(segmentsSource) ? segmentsSource : []).map((segment, index) => {
+            const record = summaryMap.get(segment.key);
+
+            return {
+                ...segment,
+                index,
+                label: record?.label ?? segment.label,
+                image: record?.image ?? segment.image,
+                remaining: record?.remaining ?? segment.remaining,
+                total: record?.total ?? segment.total,
+            };
+        });
+    };
+
+    let latestSummary = parseJsonAttribute(document.body?.dataset.initialSummary, []);
+    if (!Array.isArray(latestSummary)) {
+        latestSummary = [];
+    }
+
+    let segmentData = [];
+    let segments = [];
+    let segmentCount = 8;
+    let segmentAngle = 360 / segmentCount;
+    const spinDuration = 4200;
     let rotation = 0;
     let spinning = false;
 
-    const renderHistory = (selection) => {
-        if (!historyList) {
+    const setSegmentData = (data) => {
+        segmentData = Array.isArray(data)
+            ? data.map((segment, index) => ({ ...segment, index }))
+            : [];
+
+        segments = segmentData.map((segment) => segment.label);
+        segmentCount = segments.length || 8;
+        segmentAngle = 360 / Math.max(segmentCount, 1);
+
+        if (wheelElement) {
+            wheelElement.dataset.segments = JSON.stringify(segments);
+            wheelElement.dataset.segmentConfig = JSON.stringify(segmentData);
+        }
+
+        renderWheelLabels(segmentData);
+    };
+
+    const applyData = (segmentsSource, summarySource) => {
+        if (Array.isArray(summarySource)) {
+            latestSummary = summarySource;
+        }
+
+        const merged = mergeSummaryIntoSegments(
+            segmentsSource ?? segmentData,
+            latestSummary,
+        );
+
+        setSegmentData(merged);
+        updateSummary(latestSummary);
+    };
+
+    const calculateIndex = (currentRotation) => {
+        const normalized = ((currentRotation % 360) + 360) % 360;
+        const relative = (360 - normalized + segmentAngle / 2) % 360;
+        return Math.floor(relative / segmentAngle) % Math.max(segmentCount, 1);
+    };
+
+    const renderHistory = (label) => {
+        if (!historyList || !label) {
             return;
         }
 
         const item = document.createElement('li');
         item.className = 'history-item';
-        item.textContent = selection;
+        item.textContent = label;
         historyList.prepend(item);
 
         const maxItems = 6;
@@ -202,11 +329,100 @@ document.addEventListener('DOMContentLoaded', () => {
         }, { once: true });
     };
 
-    const calculateIndex = (currentRotation) => {
-        const normalized = ((currentRotation % 360) + 360) % 360;
-        const relative = (360 - normalized + segmentAngle / 2) % 360;
-        return Math.floor(relative / segmentAngle) % segmentCount;
+    const submitSpin = async (segmentKey) => {
+        if (!segmentKey) {
+            throw new Error('Missing prize key');
+        }
+
+        const response = await fetch('/api/spins', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({ key: segmentKey }),
+        });
+
+        if (response.ok) {
+            return response.json();
+        }
+
+        const errorPayload = await response.json().catch(() => null);
+        const errorMessage = errorPayload?.message ?? 'Unable to record spin. Please try again.';
+        throw new Error(errorMessage);
     };
+
+    const refreshFromApi = async () => {
+        try {
+            const response = await fetch('/api/prizes', { cache: 'no-store' });
+            if (!response.ok) {
+                throw new Error(`Request failed with status ${response.status}`);
+            }
+
+            const data = await response.json();
+            const segmentsSource = Array.isArray(data.segments) ? data.segments : segmentData;
+            const summarySource = Array.isArray(data.summary) ? data.summary : latestSummary;
+
+            applyData(segmentsSource, summarySource);
+        } catch (error) {
+            console.warn('Unable to refresh prize data', error);
+        }
+    };
+
+    const finalizeSpin = async (segment, fallbackLabel) => {
+        const initialLabel = segment?.label ?? fallbackLabel;
+        const initialImage = segment?.image ?? null;
+
+        setResultState({ label: initialLabel, image: initialImage });
+        showStep('result');
+        activateCelebration();
+
+        if (!segment?.key) {
+            setResultState({ label: initialLabel, image: initialImage });
+            renderHistory(initialLabel);
+            return;
+        }
+
+        try {
+            const payload = await submitSpin(segment.key);
+            const awarded = payload?.result ?? null;
+            const summary = payload?.summary ?? null;
+
+            const displayLabel = awarded?.label ?? initialLabel;
+            const image = awarded?.image ?? initialImage;
+
+            setResultState({ label: displayLabel, image });
+
+            renderHistory(displayLabel);
+
+            if (Array.isArray(summary)) {
+                applyData(undefined, summary);
+            } else {
+                refreshFromApi();
+            }
+        } catch (error) {
+            console.error('Unable to record spin', error);
+            setResultState({ label: initialLabel, image: initialImage });
+            renderHistory(initialLabel);
+            refreshFromApi();
+            if (error?.message) {
+                console.warn(error.message);
+            }
+        }
+    };
+
+    const resetResult = () => {
+        setResultState({ label: '—', image: null });
+    };
+
+    const initialSegmentSource = parseJsonAttribute(wheelElement.dataset.segmentConfig, []);
+    applyData(initialSegmentSource, latestSummary);
+
+    showStep('intro');
+    resetResult();
+    refreshFromApi();
 
     startButton?.addEventListener('click', () => {
         if (spinning) {
@@ -221,8 +437,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        resultLabel.textContent = '—';
-        updateResultImage('—');
+        resetResult();
         showStep('wheel');
     });
 
@@ -258,12 +473,10 @@ document.addEventListener('DOMContentLoaded', () => {
             wheelElement.style.transition = 'none';
 
             const index = calculateIndex(rotation);
-            const selection = segments[index] || `Reward ${index + 1}`;
-            resultLabel.textContent = selection;
-            updateResultImage(selection);
-            renderHistory(selection);
-            showStep('result');
-            activateCelebration();
+            const fallbackLabel = segments[index] || `Reward ${index + 1}`;
+            const selectedSegment = segmentData[index];
+
+            finalizeSpin(selectedSegment, fallbackLabel);
         }, spinDuration);
     });
 });

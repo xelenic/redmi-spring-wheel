@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Lucky Wheel Kiosk</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -599,6 +600,14 @@
             font-weight: 800;
             letter-spacing: 0.22em;
             text-transform: uppercase;
+            text-align: center;
+        }
+
+        .status-result-image {
+            display: none;
+            max-height: clamp(160px, 64vh, 570px);
+            width: auto;
+            margin-inline: auto;
         }
 
         .status-history {
@@ -627,6 +636,7 @@
             color: rgba(255, 216, 170, 0.92);
             box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
         }
+
 
         .status-current.celebrate {
             animation: glow 0.9s ease-in-out 3;
@@ -666,7 +676,7 @@
         }
     </style>
 </head>
-<body>
+<body data-initial-summary='@json($initialSummary)'>
     <div class="preloader" data-preloader>
         <div class="preloader__inner" role="status" aria-live="polite">
             <img
@@ -716,20 +726,12 @@
                             <div
                                 class="wheel"
                                 data-wheel
-                                data-segments='["Water bottle","Ice cream","Try again","T shirt","Mug","Umbrella","Try again","Cap"]'
+                                data-segments='@json($initialSegments->pluck("label"))'
+                                data-segment-config='@json($initialSegments)'
                             >
-                                @foreach ([
-                                    'Water bottle',
-                                    'Ice cream',
-                                    'Try again',
-                                    'T shirt',
-                                    'Mug',
-                                    'Umbrella',
-                                    'Try again',
-                                    'Cap',
-                                ] as $index => $label)
-                                    <div class="wheel__label" style="--index: {{ $index }}">
-                                        <span>{{ $label }}</span>
+                                @foreach ($initialSegments as $segment)
+                                    <div class="wheel__label" style="--index: {{ $loop->index }}">
+                                        <span>{{ $segment['label'] }}</span>
                                     </div>
                                 @endforeach
                             </div>
@@ -745,15 +747,14 @@
                             alt="Congratulations"
                             class="result-banner" style="width: 40vh;margin-bottom: 3vh;"
                         >
-                        <div class="status-current" data-highlight >
-                            <span style="display: none" style="font-size: 5vh;" class="status-value" data-result>—</span>
-                            <img data-result-image alt="" style="display: none;max-height: 24vh;width: 604px;">
+                        <div class="status-current" data-highlight>
+                            <span class="status-value" data-result>—</span>
+                            <img data-result-image alt="" class="status-result-image" style="width: 31vh;">
                         </div>
                         <div class="status-history" style="display: none">
                             <span class="status-label">Recent Winners</span>
                             <ul class="history-list" data-history></ul>
                         </div>
-
                         <img src="{{ asset('spin/03/03_Button.png') }}" alt="Play Again" data-repeat style="width: 27vh;margin-top: 14vh;">
                     </div>
                 </section>
@@ -761,278 +762,6 @@
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const wheelElement = document.querySelector('[data-wheel]');
-            const spinButton = document.querySelector('[data-spin]');
-            const resultLabel = document.querySelector('[data-result]');
-            const resultImage = document.querySelector('[data-result-image]');
-            const historyList = document.querySelector('[data-history]');
-            const highlightCard = document.querySelector('[data-highlight]');
-            const startButton = document.querySelector('[data-start]');
-            const repeatButton = document.querySelector('[data-repeat]');
-            const steps = {
-                intro: document.querySelector('[data-step="intro"]'),
-                wheel: document.querySelector('[data-step="wheel"]'),
-                result: document.querySelector('[data-step="result"]'),
-            };
-
-            const preloaderElement = document.querySelector('[data-preloader]');
-            const preloaderProgress = preloaderElement?.querySelector('[data-preloader-progress]');
-            const preloaderCount = preloaderElement?.querySelector('[data-preloader-count]');
-            const preloaderTotal = preloaderElement?.querySelector('[data-preloader-total]');
-            const preloaderNote = preloaderElement?.querySelector('[data-preloader-note]');
-
-            const assetSources = [
-                'spin/01/01_Logo.png',
-                'spin/01/01_Button.png',
-                'spin/01/BG.jpg',
-                'spin/02/02_Button.png',
-                'spin/02/Wheel_1_Steady.png',
-                'spin/02/Wheel_2_Rotate.png',
-                'spin/02/BG.jpg',
-                'spin/03/Congratulations.png',
-                'spin/03/03_Button.png',
-                'spin/03/better luck next time.png',
-                'spin/03/BG.jpg',
-            ];
-
-            const hidePreloader = () => {
-                if (!preloaderElement) {
-                    return;
-                }
-
-                preloaderElement.classList.add('is-hidden');
-
-                const cleanup = () => {
-                    preloaderElement.removeEventListener('transitionend', cleanup);
-                    if (preloaderElement.parentNode) {
-                        preloaderElement.parentNode.removeChild(preloaderElement);
-                    }
-                };
-
-                preloaderElement.addEventListener('transitionend', cleanup);
-                window.setTimeout(cleanup, 1000);
-            };
-
-            const preloadAssets = () => {
-                if (!preloaderElement) {
-                    return Promise.resolve();
-                }
-
-                const uniqueSources = Array.from(new Set(assetSources));
-                const total = uniqueSources.length;
-
-                if (preloaderTotal) {
-                    preloaderTotal.textContent = String(total);
-                }
-
-                if (total === 0) {
-                    hidePreloader();
-                    return Promise.resolve();
-                }
-
-                if (preloaderCount) {
-                    preloaderCount.textContent = '0';
-                }
-
-                if (preloaderProgress) {
-                    preloaderProgress.style.transform = 'scaleX(0)';
-                }
-
-                return new Promise((resolve) => {
-                    let loaded = 0;
-
-                    const advance = () => {
-                        loaded += 1;
-
-                        if (preloaderCount) {
-                            preloaderCount.textContent = String(loaded);
-                        }
-
-                        if (preloaderProgress) {
-                            preloaderProgress.style.transform = `scaleX(${Math.min(1, loaded / total)})`;
-                        }
-
-                        if (loaded >= total) {
-                            if (preloaderNote) {
-                                preloaderNote.textContent = 'Ready!';
-                            }
-
-                            window.setTimeout(() => {
-                                hidePreloader();
-                                resolve();
-                            }, 320);
-                        }
-                    };
-
-                    uniqueSources.forEach((src) => {
-                        const image = new Image();
-                        image.addEventListener('load', advance, { once: true });
-                        image.addEventListener('error', advance, { once: true });
-                        image.src = new URL(src, window.location.origin).toString();
-                    });
-                });
-            };
-
-            preloadAssets().catch(() => {
-                hidePreloader();
-            });
-
-            if (!wheelElement || !spinButton || !resultLabel) {
-                return;
-            }
-
-            const showStep = (key) => {
-                Object.entries(steps).forEach(([name, element]) => {
-                    if (!element) {
-                        return;
-                    }
-
-                    if (name === key) {
-                        element.classList.add('is-active');
-                        element.setAttribute('aria-hidden', 'false');
-                    } else {
-                        element.classList.remove('is-active');
-                        element.setAttribute('aria-hidden', 'true');
-                    }
-                });
-            };
-
-            showStep('intro');
-
-            @php
-                $prizeImages = [
-                    'water bottle' => asset('spin/gifts/Water Bottle.png'),
-                    'ice cream' => asset('spin/gifts/ice_cream.png'),
-                    'try again' => asset('spin/03/better luck next time.png'),
-                    't shirt' => asset('spin/gifts/T-SHIRT.png'),
-                    'mug' => asset('spin/gifts/MUG.png'),
-                    'umbrella' => asset('spin/gifts/umbrella.png'),
-                    'cap' => asset('spin/gifts/CAP.png'),
-                ];
-            @endphp
-
-            const prizeImages = Object.freeze(@json($prizeImages));
-
-            const updateResultImage = (selection) => {
-                if (!resultImage) {
-                    return;
-                }
-
-                const imageSrc = prizeImages[selection.trim().toLowerCase()] ?? null;
-
-                if (imageSrc) {
-                    resultImage.src = imageSrc;
-                    resultImage.alt = selection;
-                    resultImage.style.display = 'block';
-                } else {
-                    resultImage.removeAttribute('src');
-                    resultImage.alt = '';
-                    resultImage.style.display = 'none';
-                }
-            };
-
-            const segments = (wheelElement.dataset.segments && JSON.parse(wheelElement.dataset.segments)) || [];
-            const segmentCount = segments.length || 8;
-            const segmentAngle = 360 / segmentCount;
-            const spinDuration = 4200;
-
-            let rotation = 0;
-            let spinning = false;
-
-            const renderHistory = (selection) => {
-                if (!historyList) {
-                    return;
-                }
-
-                const item = document.createElement('li');
-                item.className = 'history-item';
-                item.textContent = selection;
-                historyList.prepend(item);
-
-                const maxItems = 6;
-                while (historyList.children.length > maxItems) {
-                    historyList.removeChild(historyList.lastElementChild);
-                }
-            };
-
-            const activateCelebration = () => {
-                if (!highlightCard) {
-                    return;
-                }
-
-                highlightCard.classList.add('celebrate');
-                highlightCard.addEventListener('animationend', () => {
-                    highlightCard.classList.remove('celebrate');
-                }, { once: true });
-            };
-
-            const calculateIndex = (currentRotation) => {
-                const normalized = ((currentRotation % 360) + 360) % 360;
-                const relative = (360 - normalized + segmentAngle / 2) % 360;
-                return Math.floor(relative / segmentAngle) % segmentCount;
-            };
-
-            startButton?.addEventListener('click', () => {
-                if (spinning) {
-                    return;
-                }
-
-                showStep('wheel');
-            });
-
-            repeatButton?.addEventListener('click', () => {
-                if (spinning) {
-                    return;
-                }
-
-                resultLabel.textContent = '—';
-                updateResultImage('—');
-                showStep('wheel');
-            });
-
-            spinButton.addEventListener('click', () => {
-                if (spinning) {
-                    return;
-                }
-
-                spinning = true;
-                spinButton.disabled = true;
-                wheelElement.classList.add('is-spinning');
-
-                const currentNormalized = ((rotation % 360) + 360) % 360;
-                rotation = currentNormalized;
-
-                wheelElement.style.transition = 'none';
-                wheelElement.style.setProperty('--rotation', `${rotation}deg`);
-
-                window.requestAnimationFrame(() => {
-                    wheelElement.style.transition = `transform ${spinDuration}ms cubic-bezier(0.22, 0.9, 0.15, 1)`;
-
-                    const extraSpins = 4 + Math.random() * 3;
-                    const randomOffset = Math.random() * 360;
-                    rotation += extraSpins * 360 + randomOffset;
-
-                    wheelElement.style.setProperty('--rotation', `${rotation}deg`);
-                });
-
-                window.setTimeout(() => {
-                    spinning = false;
-                    spinButton.disabled = false;
-                    wheelElement.classList.remove('is-spinning');
-                    wheelElement.style.transition = 'none';
-
-                    const index = calculateIndex(rotation);
-                    const selection = segments[index] || `Reward ${index + 1}`;
-                    resultLabel.textContent = selection;
-                    updateResultImage(selection);
-                    renderHistory(selection);
-                    showStep('result');
-                    activateCelebration();
-                }, spinDuration);
-            });
-        });
-    </script>
+    <script src="{{ asset('spring-wheel.js') }}" defer></script>
 </body>
 </html>
