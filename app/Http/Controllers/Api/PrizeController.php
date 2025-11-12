@@ -31,9 +31,21 @@ class PrizeController extends Controller
                 'remaining' => $prize?->stock_remaining,
                 'total' => $prize?->stock_total,
             ];
+        })->filter(function (array $segment): bool {
+            if (!array_key_exists('remaining', $segment)) {
+                return true;
+            }
+
+            $remaining = $segment['remaining'];
+
+            return $remaining === null || $remaining > 0;
         })->values();
 
-        $summary = $this->formatSummary($prizes->values());
+        $availablePrizes = $prizes->values()->filter(function (Prize $prize): bool {
+            return $prize->stock_remaining === null || $prize->stock_remaining > 0;
+        });
+
+        $summary = $this->formatSummary($availablePrizes);
 
         return response()->json([
             'segments' => $segments,
