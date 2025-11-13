@@ -33,8 +33,8 @@ class PrizeSeeder extends Seeder
             [
                 'key' => 'try-again',
                 'display_name' => 'Try again',
-                'stock_total' => 1000,
-                'stock_remaining' => 1000,
+                'stock_total' => 300,
+                'stock_remaining' => 300,
                 'image_path' => 'spin/03/better luck next time.png',
                 'sort_order' => 3,
             ],
