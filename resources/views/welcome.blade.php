@@ -38,10 +38,7 @@
             align-items: center;
             justify-content: center;
             padding: clamp(18px, 3vh, 40px);
-            background: radial-gradient(circle at 20% -10%, rgba(255, 110, 20, 0.45) 0%, transparent 48%),
-                radial-gradient(circle at 80% 0%, rgba(255, 80, 0, 0.35) 0%, transparent 52%),
-                linear-gradient(180deg, var(--bg-top) 0%, var(--bg-mid) 45%, var(--bg-bottom) 100%);
-            font-family: 'Manrope', 'Segoe UI', Roboto, sans-serif;
+            background: radial-gradient(circle at 20% -10%, rgb(38 101 139) 0%, transparent 48%), radial-gradient(circle at 80% 0%, rgb(53 143 193) 0%, transparent 52%), linear-gradient(180deg, var(--bg-top) 0%, #2772a1 45%, #407292 100%);
             color: var(--text-primary);
         }
 
@@ -126,7 +123,8 @@
             height: min(97vh, 1880px);
             aspect-ratio: 9 / 16;
             margin: 0 auto;
-            background: linear-gradient(180deg, rgba(24, 4, 0, 0.96) 0%, rgba(8, 1, 0, 0.92) 100%);
+            background: url('{{ asset("spin/01/BG.jpg") }}') center/cover no-repeat,
+                linear-gradient(180deg, rgba(24, 4, 0, 0.96) 0%, rgba(8, 1, 0, 0.92) 100%);
             border: 1px solid var(--border-light);
             border-radius: 44px;
             box-shadow:
