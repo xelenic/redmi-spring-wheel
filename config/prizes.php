@@ -2,14 +2,14 @@
 
 return [
     'segment_order' => [
-        'water-bottle',
-        'ice-cream',
         'try-again',
-        't-shirt',
-        'mug',
-        'umbrella',
+        'chocolate-lava-cake',
         'try-again',
-        'cap',
+        'large-extra-bbq-pizza',
+        'garlic-bread',
+        'regular-peperoni-pizza',
+        'try-again',
+        'chocolate-lava-cake',
     ],
     'fallback_key' => 'try-again',
 ];
