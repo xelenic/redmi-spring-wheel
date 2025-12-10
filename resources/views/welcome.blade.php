@@ -364,7 +364,7 @@
             transform: translateY(0);
             overflow: visible;
             height: 116vh;
-            margin-top: 14vh;
+            margin-top: 5vh;
         }
 
         .step--result {
@@ -702,7 +702,7 @@
                         <img
                             src="{{ asset('spin/01/01_Logo.png') }}"
                             alt="Redmi Spring Wheel"
-                            class="intro__logo" style="height: 14vh;"
+                            class="intro__logo" style="height: 21vh;"
                         >
 
 
@@ -716,7 +716,7 @@
                     <img
                     src="{{ asset('spin/01/01_Logo.png') }}"
                     alt="Redmi Spring Wheel"
-                    class="intro__logo" style="height: 14vh;"
+                    class="intro__logo" style="height: 23vh;"
                 >
                     <div class="wheel-stage">
                         <div class="wheel-wrapper">
