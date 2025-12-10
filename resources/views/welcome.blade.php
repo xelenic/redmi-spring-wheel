@@ -448,6 +448,7 @@
         .pointer {
             position: absolute;
             top: 17%;
+            display: none;
             left: 50%;
             transform: translate(-50%, 0);
             width: clamp(38px, 9vh, 54px);
