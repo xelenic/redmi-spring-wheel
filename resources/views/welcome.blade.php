@@ -693,7 +693,7 @@
             <img
                 src="{{ asset('spin/01/01_Logo.png') }}"
                 alt="Loading Redmi Spring Wheel"
-                class="preloader__logo"
+                class="preloader__logo" style="height: 37vh;width: 49vh;max-width: 70vh;"
             >
             <p class="preloader__message" data-preloader-note>Preparing your experience…</p>
             <div class="preloader__track" aria-hidden="true">
@@ -715,7 +715,7 @@
                         <img
                             src="{{ asset('spin/01/01_Logo.png') }}"
                             alt="Redmi Spring Wheel"
-                            class="intro__logo" style="height: 21vh;"
+                            class="intro__logo" style="height: 37vh;width: 49vh;max-width: 70vh;"
                         >
 
 
