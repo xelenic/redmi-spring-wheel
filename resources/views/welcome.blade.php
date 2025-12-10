@@ -598,6 +598,7 @@
             font-weight: 800;
             letter-spacing: 0.22em;
             text-transform: uppercase;
+            display: none;
             text-align: center;
         }
 
