@@ -714,7 +714,7 @@
                         <img
                             src="{{ asset('spin/01/01_Logo.png') }}"
                             alt="Dominos Spring Wheel"
-                            class="intro__logo" style="height: 33vh;width: 40vh;max-width: 70vh;"
+                            class="intro__logo" style="/* height: 33vh; */width: 40vh;max-width: 70vh;"
                         >
 
 
@@ -726,9 +726,9 @@
 
                 <section class="step step--wheel" data-step="wheel">
                     <img
-                    src="{{ asset('spin/01/01_Logo.png') }}"
+                    src="{{ asset('spin/03/Logo_3.png') }}"
                     alt="Dominos Spring Wheel"
-                    class="intro__logo" style="height: 26vh;width: 33vh;"
+                    class="intro__logo" style="/* height: 26vh; */width: 33vh;"
                 >
                     <div class="wheel-stage">
                         <div class="wheel-wrapper">
