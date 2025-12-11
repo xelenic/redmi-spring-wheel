@@ -692,7 +692,7 @@
         <div class="preloader__inner" role="status" aria-live="polite">
             <img
                 src="{{ asset('spin/01/01_Logo.png') }}"
-                alt="Loading Redmi Spring Wheel"
+                alt="Loading dominos Spring Wheel"
                 class="preloader__logo" style="height: 37vh;width: 49vh;max-width: 70vh;"
             >
             <p class="preloader__message" data-preloader-note>Preparing your experience…</p>
@@ -714,7 +714,7 @@
                     <div class="intro intro--step-one">
                         <img
                             src="{{ asset('spin/01/01_Logo.png') }}"
-                            alt="Redmi Spring Wheel"
+                            alt="Dominos Spring Wheel"
                             class="intro__logo" style="height: 37vh;width: 49vh;max-width: 70vh;"
                         >
 
@@ -728,7 +728,7 @@
                 <section class="step step--wheel" data-step="wheel">
                     <img
                     src="{{ asset('spin/01/01_Logo.png') }}"
-                    alt="Redmi Spring Wheel"
+                    alt="Dominos Spring Wheel"
                     class="intro__logo" style="height: 23vh;"
                 >
                     <div class="wheel-stage">

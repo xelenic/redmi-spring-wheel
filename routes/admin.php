@@ -26,3 +26,4 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/spins/{spin}', [SpinController::class, 'show'])->name('spins.show');
 });
 
+

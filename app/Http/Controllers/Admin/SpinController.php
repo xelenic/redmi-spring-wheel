@@ -44,3 +44,4 @@ class SpinController extends Controller
     }
 }
 
+
