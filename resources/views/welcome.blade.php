@@ -240,6 +240,47 @@
 
         .step--wheel {
             flex-direction: column;
+            position: relative;
+        }
+
+        .home-button {
+            position: absolute;
+            top: clamp(20px, 3vh, 32px);
+            right: clamp(20px, 3vh, 32px);
+            appearance: none;
+            border: 0;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: clamp(8px, 1.6vh, 12px);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-primary);
+            transition: all 0.18s ease;
+            z-index: 10;
+            width: clamp(36px, 5vh, 44px);
+            height: clamp(36px, 5vh, 44px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .home-button:hover,
+        .home-button:focus-visible {
+            background: rgba(255, 255, 255, 0.18);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+        }
+
+        .home-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .home-button svg {
+            width: clamp(18px, 2.4vh, 22px);
+            height: clamp(18px, 2.4vh, 22px);
         }
 
         .intro {
@@ -379,6 +420,7 @@
 
         .step--result {
             flex-direction: column;
+            position: relative;
         }
 
         .result-wrapper {
@@ -727,6 +769,11 @@
                 </section>
 
                 <section class="step step--wheel" data-step="wheel">
+                    <button class="home-button" data-home aria-label="Home" title="Home">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M3 12L5 10M5 10L12 3L19 10M5 10V20C5 20.5523 5.44772 21 6 21H9M19 10L21 12M19 10V20C19 20.5523 18.5523 21 18 21H15M9 21C9.55228 21 10 20.5523 10 20V16C10 15.4477 10.4477 15 11 15H13C13.5523 15 14 15.4477 14 16V20C14 20.5523 14.4477 21 15 21M9 21H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
                     <img
                     src="{{ asset('spin/03/Logo_3.png') }}"
                     alt="Dominos Spring Wheel"
@@ -753,6 +800,11 @@
                 </section>
 
                 <section class="step step--result" data-step="result">
+                    <button class="home-button" data-home aria-label="Home" title="Home">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M3 12L5 10M5 10L12 3L19 10M5 10V20C5 20.5523 5.44772 21 6 21H9M19 10L21 12M19 10V20C19 20.5523 18.5523 21 18 21H15M9 21C9.55228 21 10 20.5523 10 20V16C10 15.4477 10.4477 15 11 15H13C13.5523 15 14 15.4477 14 16V20C14 20.5523 14.4477 21 15 21M9 21H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
                     <div class="result-wrapper">
                         <img
                             src="{{ asset('spin/03/Congratulations.png') }}"

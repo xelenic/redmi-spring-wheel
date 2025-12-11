@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const highlightCard = document.querySelector('[data-highlight]');
     const startButton = document.querySelector('[data-start]');
     const repeatButton = document.querySelector('[data-repeat]');
+    const homeButtons = document.querySelectorAll('[data-home]');
     const steps = {
         intro: document.querySelector('[data-step="intro"]'),
         wheel: document.querySelector('[data-step="wheel"]'),
@@ -536,7 +537,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         resetResult();
-        showStep('wheel');
+        showStep('intro');
+    });
+
+    homeButtons.forEach((homeButton) => {
+        homeButton?.addEventListener('click', () => {
+            if (spinning) {
+                return;
+            }
+
+            showStep('intro');
+        });
     });
 
     spinButton.addEventListener('click', async () => {
