@@ -375,7 +375,6 @@
             transform: translateY(0);
             overflow: visible;
             height: 116vh;
-            margin-top: 5vh;
         }
 
         .step--result {
@@ -693,7 +692,7 @@
             <img
                 src="{{ asset('spin/01/01_Logo.png') }}"
                 alt="Loading dominos Spring Wheel"
-                class="preloader__logo" style="height: 37vh;width: 49vh;max-width: 70vh;"
+                class="preloader__logo" style="height: 39vh;width: 40vh;max-width: 70vh;"
             >
             <p class="preloader__message" data-preloader-note>Preparing your experience…</p>
             <div class="preloader__track" aria-hidden="true">
@@ -715,7 +714,7 @@
                         <img
                             src="{{ asset('spin/01/01_Logo.png') }}"
                             alt="Dominos Spring Wheel"
-                            class="intro__logo" style="height: 37vh;width: 49vh;max-width: 70vh;"
+                            class="intro__logo" style="height: 33vh;width: 40vh;max-width: 70vh;"
                         >
 
 
@@ -729,7 +728,7 @@
                     <img
                     src="{{ asset('spin/01/01_Logo.png') }}"
                     alt="Dominos Spring Wheel"
-                    class="intro__logo" style="height: 23vh;"
+                    class="intro__logo" style="height: 26vh;width: 33vh;"
                 >
                     <div class="wheel-stage">
                         <div class="wheel-wrapper">
