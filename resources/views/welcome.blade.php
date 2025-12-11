@@ -717,8 +717,10 @@
                             class="intro__logo" style="/* height: 33vh; */width: 40vh;max-width: 70vh;"
                         >
 
+                        <img src="{{ asset('spin/01/QR.png') }}" alt="Play" style="height: 35vh;">
 
-                        <img src="{{ asset('spin/01/01_Button.png') }}" alt="Play" style="height: 15vh;margin-top: 30vh;" data-start>
+
+                        <img src="{{ asset('spin/01/01_Button.png') }}" alt="Play" style="height: 15vh;" data-start>
 
 
                     </div>
