@@ -145,6 +145,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    const resetWheelRotation = () => {
+        if (spinning || !wheelElement) {
+            return;
+        }
+
+        // Reset rotation to 0 when showing wheel step
+        rotation = 0;
+        wheelElement.style.transition = 'none';
+        wheelElement.style.transform = 'rotate(0deg)';
+        wheelElement.style.setProperty('--rotation', '0deg');
+        // Force a reflow
+        void wheelElement.offsetHeight;
+    };
+
     const showStep = (key) => {
         Object.entries(steps).forEach(([name, element]) => {
             if (!element) {
@@ -159,6 +173,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 element.setAttribute('aria-hidden', 'true');
             }
         });
+
+        // Reset wheel rotation when showing wheel step
+        if (key === 'wheel') {
+            resetWheelRotation();
+        }
     };
 
     const renderWheelLabels = (data) => {
@@ -352,44 +371,129 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const spinToSegment = (targetSegment) => {
-        if (spinning) {
+        if (spinning || !wheelElement || !spinButton) {
             return;
         }
 
-        const currentNormalized = ((rotation % 360) + 360) % 360;
-        const targetIndex = typeof targetSegment?.index === 'number'
-            ? targetSegment.index % Math.max(segmentCount, 1)
-            : null;
+        try {
+            const currentNormalized = ((rotation % 360) + 360) % 360;
+            const targetIndex = typeof targetSegment?.index === 'number'
+                ? targetSegment.index % Math.max(segmentCount, 1)
+                : null;
 
-        spinning = true;
-        spinButton.disabled = true;
-        wheelElement.classList.add('is-spinning');
+            spinning = true;
+            spinButton.disabled = true;
+            wheelElement.classList.add('is-spinning');
 
-        wheelElement.style.transition = 'none';
-        rotation = currentNormalized;
-        wheelElement.style.setProperty('--rotation', `${rotation}deg`);
+        // Calculate the target rotation
+        const extraSpins = 4 + Math.floor(Math.random() * 3);
+        let targetRotation;
 
-        window.requestAnimationFrame(() => {
-            wheelElement.style.transition = `transform ${spinDuration}ms cubic-bezier(0.22, 0.9, 0.15, 1)`;
-            const extraSpins = 4 + Math.floor(Math.random() * 3);
+        if (targetIndex !== null && segmentCount > 0) {
+            const normalizedTarget = (360 - (targetIndex * segmentAngle)) % 360;
+            let delta = normalizedTarget - currentNormalized;
 
-            if (targetIndex !== null && segmentCount > 0) {
-                const normalizedTarget = (360 - (targetIndex * segmentAngle)) % 360;
-                const delta = normalizedTarget - currentNormalized;
-                rotation += extraSpins * 360 + delta;
-            } else {
-                const randomOffset = Math.random() * 360;
-                rotation += extraSpins * 360 + randomOffset;
+            // Normalize delta to be between -180 and 180
+            if (delta > 180) {
+                delta -= 360;
+            } else if (delta < -180) {
+                delta += 360;
             }
 
-            wheelElement.style.setProperty('--rotation', `${rotation}deg`);
+            // Ensure minimum rotation of at least 360 degrees to guarantee visible movement
+            // Add a small random offset to prevent identical spins
+            const randomOffset = (Math.random() - 0.5) * 30; // ±15 degrees variation
+            const minRotation = extraSpins * 360;
+            targetRotation = rotation + minRotation + delta + randomOffset;
+
+            // Ensure we always rotate at least 360 degrees from current position
+            if (Math.abs(targetRotation - rotation) < 360) {
+                targetRotation = rotation + 360 + delta + randomOffset;
+            }
+        } else {
+            const randomOffset = Math.random() * 360;
+            targetRotation = rotation + extraSpins * 360 + randomOffset;
+        }
+
+        // Ensure target rotation is always significantly different (at least 360 degrees)
+        const rotationDiff = Math.abs(targetRotation - rotation);
+        if (rotationDiff < 360) {
+            targetRotation = rotation + 360 + (targetRotation - rotation);
+        }
+
+        // Store the final rotation value
+        const finalRotation = targetRotation;
+
+        // Reset: remove transition and set current position using direct transform
+        wheelElement.style.transition = 'none';
+        const initialRotation = currentNormalized;
+        wheelElement.style.transform = `rotate(${initialRotation}deg)`;
+        wheelElement.style.setProperty('--rotation', `${initialRotation}deg`);
+
+        // Force immediate reflow to apply reset
+        void wheelElement.offsetHeight;
+
+        // Clean up any existing transitionend listeners
+        const handleTransitionEnd = () => {
+            wheelElement.removeEventListener('transitionend', handleTransitionEnd);
+        };
+        wheelElement.addEventListener('transitionend', handleTransitionEnd, { once: true });
+
+        // Use requestAnimationFrame to ensure reset is processed
+        requestAnimationFrame(() => {
+            // Update rotation value
+            rotation = finalRotation;
+            const targetRotation = rotation;
+
+            // Set transition property first
+            wheelElement.style.transition = `transform ${spinDuration}ms cubic-bezier(0.22, 0.9, 0.15, 1)`;
+
+            // Force a reflow
+            void wheelElement.offsetHeight;
+
+            // Set the new rotation value in the next frame using direct transform
+            requestAnimationFrame(() => {
+                wheelElement.style.transform = `rotate(${targetRotation}deg)`;
+                wheelElement.style.setProperty('--rotation', `${targetRotation}deg`);
+
+                // Force reflow to trigger transition
+                void wheelElement.offsetHeight;
+            });
         });
 
+        // Safety timeout: ensure button is always re-enabled even if something goes wrong
+        const safetyTimeout = setTimeout(() => {
+            if (spinning) {
+                console.warn('Spin safety timeout triggered - resetting button state');
+                spinning = false;
+                if (spinButton) {
+                    spinButton.disabled = false;
+                }
+                if (wheelElement) {
+                    wheelElement.classList.remove('is-spinning');
+                }
+            }
+        }, spinDuration + 2000); // 2 seconds after expected completion
+
         window.setTimeout(() => {
+            // Clear safety timeout since we completed normally
+            clearTimeout(safetyTimeout);
+
             spinning = false;
-            spinButton.disabled = false;
-            wheelElement.classList.remove('is-spinning');
-            wheelElement.style.transition = 'none';
+            if (spinButton) {
+                spinButton.disabled = false;
+            }
+            if (wheelElement) {
+                wheelElement.classList.remove('is-spinning');
+                wheelElement.style.transition = 'none';
+            }
+
+            // Ensure final rotation is set correctly (normalize to 0-360 range for consistency)
+            if (wheelElement) {
+                const normalizedFinal = ((rotation % 360) + 360) % 360;
+                wheelElement.style.transform = `rotate(${rotation}deg)`;
+                wheelElement.style.setProperty('--rotation', `${rotation}deg`);
+            }
 
             const landedIndex = calculateIndex(rotation);
             const landedSegment = segmentData[landedIndex];
@@ -403,6 +507,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
             finalizeSpin(preferredSegment, fallbackLabel);
         }, spinDuration);
+
+        } catch (error) {
+            console.error('Error in spinToSegment:', error);
+            // Always reset state on error
+            spinning = false;
+            if (spinButton) {
+                spinButton.disabled = false;
+            }
+            if (wheelElement) {
+                wheelElement.classList.remove('is-spinning');
+            }
+        }
     };
 
     const renderHistory = (label) => {
@@ -555,8 +671,14 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // Prevent multiple clicks
+        if (spinButton.disabled) {
+            return;
+        }
+
         try {
             spinButton.disabled = true;
+
             const payload = await submitSpin();
             pendingSpinPayload = payload;
 
@@ -571,7 +693,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (error?.message) {
                 console.warn(error.message);
             }
+            // Always reset state on error
+            spinning = false;
             spinButton.disabled = false;
+            if (wheelElement) {
+                wheelElement.classList.remove('is-spinning');
+            }
         }
     });
 });
