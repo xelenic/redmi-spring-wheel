@@ -28,7 +28,7 @@ class PrizeSeeder extends Seeder
                 // Adjust these counts as needed.
                 'stock_total' => 100,
                 'stock_remaining' => 100,
-                'image_path' => null,
+                'image_path' => 'spin/gifts/Pen.png',
                 'sort_order' => 2,
             ],
             [
