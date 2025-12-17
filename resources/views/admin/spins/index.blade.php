@@ -14,11 +14,15 @@
                     placeholder="Search by result...">
             </div>
             <div>
-                <label for="issued" class="block text-gray-700 text-sm font-bold mb-2">Status</label>
-                <select id="issued" name="issued" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                <label for="awarded_prize_id" class="block text-gray-700 text-sm font-bold mb-2">Awarded Prize</label>
+                <select id="awarded_prize_id" name="awarded_prize_id" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                     <option value="">All</option>
-                    <option value="1" {{ request('issued') === '1' ? 'selected' : '' }}>Issued</option>
-                    <option value="0" {{ request('issued') === '0' ? 'selected' : '' }}>Not Issued</option>
+                    <option value="none" {{ request('awarded_prize_id') === 'none' ? 'selected' : '' }}>None</option>
+                    @foreach(($prizeOptions ?? []) as $prize)
+                        <option value="{{ $prize->id }}" {{ (string) request('awarded_prize_id') === (string) $prize->id ? 'selected' : '' }}>
+                            {{ $prize->display_name }}
+                        </option>
+                    @endforeach
                 </select>
             </div>
             <div>

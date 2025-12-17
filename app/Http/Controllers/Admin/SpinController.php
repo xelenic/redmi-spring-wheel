@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Prize;
 use App\Models\Spin;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -17,6 +18,11 @@ class SpinController extends Controller
         $this->applyFilters($query, $request);
 
         $spins = $query->paginate(50)->withQueryString();
+
+        $prizeOptions = Prize::query()
+            ->orderBy('sort_order')
+            ->orderBy('display_name')
+            ->get(['id', 'display_name']);
 
         $dailyStats = null;
         if ($group === 'day') {
@@ -33,7 +39,7 @@ class SpinController extends Controller
                 ->get();
         }
 
-        return view('admin.spins.index', compact('spins', 'group', 'dailyStats'));
+        return view('admin.spins.index', compact('spins', 'group', 'dailyStats', 'prizeOptions'));
     }
 
     public function show(Spin $spin)
@@ -45,9 +51,14 @@ class SpinController extends Controller
 
     protected function applyFilters(Builder $query, Request $request): void
     {
-        // Filter by issued status
-        if ($request->has('issued') && $request->issued !== '') {
-            $query->where('issued', $request->boolean('issued'));
+        // Filter by awarded prize
+        $awardedPrizeId = $request->input('awarded_prize_id');
+        if ($awardedPrizeId !== null && $awardedPrizeId !== '' && $awardedPrizeId !== 'all') {
+            if ($awardedPrizeId === 'none') {
+                $query->whereNull('awarded_prize_id');
+            } elseif (is_numeric($awardedPrizeId) && (int) $awardedPrizeId > 0) {
+                $query->where('awarded_prize_id', (int) $awardedPrizeId);
+            }
         }
 
         // Filter by date range
