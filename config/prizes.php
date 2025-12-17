@@ -8,7 +8,7 @@ return [
         'large-extra-bbq-pizza',
         'garlic-bread',
         'regular-peperoni-pizza',
-        'try-again',
+        'pen',
         'chocolate-lava-cake',
     ],
     'fallback_key' => 'try-again',

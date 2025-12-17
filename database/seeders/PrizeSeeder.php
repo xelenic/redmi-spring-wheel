@@ -16,11 +16,20 @@ class PrizeSeeder extends Seeder
         $prizes = [
             [
                 'key' => 'try-again',
-                'display_name' => 'Try again',
+                'display_name' => 'Try Again',
                 'stock_total' => null,
                 'stock_remaining' => null,
                 'image_path' => 'spin/03/better luck next time.png',
                 'sort_order' => 1,
+            ],
+            [
+                'key' => 'pen',
+                'display_name' => 'Pen',
+                // Adjust these counts as needed.
+                'stock_total' => 100,
+                'stock_remaining' => 100,
+                'image_path' => null,
+                'sort_order' => 2,
             ],
             [
                 'key' => 'chocolate-lava-cake',
@@ -28,7 +37,7 @@ class PrizeSeeder extends Seeder
                 'stock_total' => 100,
                 'stock_remaining' => 100,
                 'image_path' => 'spin/gifts/Chocolate Lava Cake.png',
-                'sort_order' => 2,
+                'sort_order' => 3,
             ],
             [
                 'key' => 'large-extra-bbq-pizza',
@@ -36,7 +45,7 @@ class PrizeSeeder extends Seeder
                 'stock_total' => 30,
                 'stock_remaining' => 30,
                 'image_path' => 'spin/gifts/Large Texas BBQ Pizza.png',
-                'sort_order' => 3,
+                'sort_order' => 4,
             ],
             [
                 'key' => 'garlic-bread',
@@ -44,7 +53,7 @@ class PrizeSeeder extends Seeder
                 'stock_total' => 50,
                 'stock_remaining' => 50,
                 'image_path' => 'spin/gifts/Theriyaki Stuffed Garlic Bread.png',
-                'sort_order' => 4,
+                'sort_order' => 5,
             ],
             [
                 'key' => 'regular-peperoni-pizza',
@@ -52,7 +61,7 @@ class PrizeSeeder extends Seeder
                 'stock_total' => 20,
                 'stock_remaining' => 20,
                 'image_path' => 'spin/gifts/Regular Pepperoni Pizza.png',
-                'sort_order' => 5,
+                'sort_order' => 6,
             ],
         ];
 

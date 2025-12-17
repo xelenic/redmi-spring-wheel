@@ -245,6 +245,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const setResultState = ({ label = '—', image = null } = {}) => {
         if (resultLabel) {
             resultLabel.textContent = label;
+            // Show text only when no image is available.
+            resultLabel.style.display = image ? 'none' : 'block';
         }
 
         if (resultImage) {
