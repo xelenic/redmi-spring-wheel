@@ -368,7 +368,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const calculateIndex = (currentRotation) => {
         const normalized = ((currentRotation % 360) + 360) % 360;
-        const relative = (360 - normalized + segmentAngle / 2) % 360;
+        const relative = (360 - normalized) % 360;
         return Math.floor(relative / segmentAngle) % Math.max(segmentCount, 1);
     };
 
@@ -392,7 +392,8 @@ document.addEventListener('DOMContentLoaded', () => {
         let targetRotation;
 
         if (targetIndex !== null && segmentCount > 0) {
-            const normalizedTarget = (360 - (targetIndex * segmentAngle)) % 360;
+            // Target the center of the segment, not its leading boundary
+            const normalizedTarget = (360 - (targetIndex * segmentAngle + segmentAngle / 2) + 360) % 360;
             let delta = normalizedTarget - currentNormalized;
 
             // Normalize delta to be between -180 and 180

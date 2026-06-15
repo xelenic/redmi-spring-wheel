@@ -23,45 +23,28 @@ class PrizeSeeder extends Seeder
                 'sort_order' => 1,
             ],
             [
-                'key' => 'pen',
-                'display_name' => 'Pen',
-                // Adjust these counts as needed.
-                'stock_total' => 100,
-                'stock_remaining' => 100,
-                'image_path' => 'spin/gifts/Pen.png',
+                'key' => 'redmi-bud-5a',
+                'display_name' => 'Redmi Buds 5A',
+                'stock_total' => 50,
+                'stock_remaining' => 50,
+                'image_path' => 'spin_data/Gifts/Buds.png',
                 'sort_order' => 2,
             ],
             [
-                'key' => 'chocolate-lava-cake',
-                'display_name' => 'Chocolate Lava Cake',
-                'stock_total' => 100,
-                'stock_remaining' => 100,
-                'image_path' => 'spin/gifts/Chocolate Lava Cake.png',
+                'key' => 'power-bank',
+                'display_name' => 'Power Bank',
+                'stock_total' => 50,
+                'stock_remaining' => 50,
+                'image_path' => 'spin_data/Gifts/PowerBank.png',
                 'sort_order' => 3,
             ],
             [
-                'key' => 'large-extra-bbq-pizza',
-                'display_name' => 'Large Extra BBQ Pizza',
-                'stock_total' => 30,
-                'stock_remaining' => 30,
-                'image_path' => 'spin/gifts/Large Texas BBQ Pizza.png',
-                'sort_order' => 4,
-            ],
-            [
-                'key' => 'garlic-bread',
-                'display_name' => 'Garlic Bread',
+                'key' => 'watch',
+                'display_name' => 'Watch',
                 'stock_total' => 50,
                 'stock_remaining' => 50,
-                'image_path' => 'spin/gifts/Theriyaki Stuffed Garlic Bread.png',
-                'sort_order' => 5,
-            ],
-            [
-                'key' => 'regular-peperoni-pizza',
-                'display_name' => 'Regular Peperoni Pizza',
-                'stock_total' => 20,
-                'stock_remaining' => 20,
-                'image_path' => 'spin/gifts/Regular Pepperoni Pizza.png',
-                'sort_order' => 6,
+                'image_path' => 'spin_data/Gifts/Watch.png',
+                'sort_order' => 4,
             ],
         ];
 
@@ -71,25 +54,10 @@ class PrizeSeeder extends Seeder
 
             $prize->fill(Arr::except($data, ['stock_total', 'stock_remaining']));
 
-            if ($data['stock_total'] !== null) {
-                $prize->stock_total = $data['stock_total'];
-            }
-
-            if ($data['stock_remaining'] !== null) {
-                $prize->stock_remaining = $data['stock_remaining'];
-            }
-
-            // Ensure unlimited prizes stay null.
-            if ($data['stock_total'] === null) {
-                $prize->stock_total = null;
-            }
-
-            if ($data['stock_remaining'] === null) {
-                $prize->stock_remaining = null;
-            }
+            $prize->stock_total = $data['stock_total'];
+            $prize->stock_remaining = $data['stock_remaining'];
 
             $prize->save();
         }
     }
 }
-

@@ -49,7 +49,7 @@
             align-items: center;
             justify-content: center;
             padding: clamp(18px, 3vh, 40px);
-            background: radial-gradient(circle at 20% -10%, rgb(38 101 139) 0%, transparent 48%), radial-gradient(circle at 80% 0%, rgb(53 143 193) 0%, transparent 52%), linear-gradient(180deg, var(--bg-top) 0%, #2772a1 45%, #407292 100%);
+            /* background: radial-gradient(circle at 20% -10%, rgb(38 101 139) 0%, transparent 48%), radial-gradient(circle at 80% 0%, rgb(53 143 193) 0%, transparent 52%), linear-gradient(180deg, var(--bg-top) 0%, #2772a1 45%, #407292 100%); */
             color: var(--text-primary);
         }
 
@@ -138,9 +138,9 @@
                 linear-gradient(180deg, rgba(24, 4, 0, 0.96) 0%, rgba(8, 1, 0, 0.92) 100%);
             border: 1px solid var(--border-light);
             border-radius: 44px;
-            box-shadow:
+            /* box-shadow:
                 0 40px 120px rgba(0, 0, 0, 0.65),
-                inset 0 1px 0 rgba(255, 255, 255, 0.12);
+                inset 0 1px 0 rgba(255, 255, 255, 0.12); */
             overflow: hidden;
             display: flex;
             padding: clamp(20px, 3vh, 32px);
@@ -756,13 +756,11 @@
                         <img
                             src="{{ asset('spin/01/01_Logo.png') }}"
                             alt="Dominos Spring Wheel"
-                            class="intro__logo" style="/* height: 33vh; */width: 40vh;max-width: 70vh;"
+                            class="intro__logo" style="/* height: 33vh; */width: 40vh;max-width: 70vh;position: absolute;top: 370px;"
                         >
 
-                        <img src="{{ asset('spin/01/QR.png') }}" alt="Play" style="height: 35vh;">
 
-
-                        <img src="{{ asset('spin/01/01_Button.png') }}" alt="Play" style="height: 15vh;" data-start>
+                        <img src="{{ asset('spin/01/01_Button.png') }}" alt="Play" style="height: 11vh;position: absolute;top: 70vh;" data-start>
 
 
                     </div>

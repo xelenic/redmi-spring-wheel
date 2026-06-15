@@ -3,13 +3,11 @@
 return [
     'segment_order' => [
         'try-again',
-        'chocolate-lava-cake',
+        'redmi-bud-5a',
         'try-again',
-        'large-extra-bbq-pizza',
-        'garlic-bread',
-        'regular-peperoni-pizza',
-        'pen',
-        'chocolate-lava-cake',
+        'power-bank',
+        'try-again',
+        'watch'
     ],
     'fallback_key' => 'try-again',
 ];
