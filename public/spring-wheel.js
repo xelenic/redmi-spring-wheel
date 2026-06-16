@@ -10,11 +10,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const startButton = document.querySelector('[data-start]');
     const repeatButton = document.querySelector('[data-repeat]');
     const homeButtons = document.querySelectorAll('[data-home]');
+    const resultHomeButton = document.querySelector('[data-step="result"] [data-home]');
+    const resultNextButton = document.querySelector('[data-result-next]');
     const steps = {
         intro: document.querySelector('[data-step="intro"]'),
         wheel: document.querySelector('[data-step="wheel"]'),
         result: document.querySelector('[data-step="result"]'),
+        contact: document.querySelector('[data-step="contact"]'),
     };
+
+    const contactForm = document.querySelector('[data-contact-form]');
+    const contactNameInput = document.querySelector('[data-contact-name]');
+    const contactPhoneInput = document.querySelector('[data-contact-phone]');
+    const contactErrorElement = document.querySelector('[data-contact-error]');
+    const contactDoneButton = document.querySelector('[data-contact-done]');
 
     const bannerSources = {
         default: resultBanner?.dataset.defaultSrc ?? '',
@@ -334,6 +343,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let rotation = 0;
     let spinning = false;
     let pendingSpinPayload = null;
+    let lastSpinId = null;
+    let lastResultKey = null;
 
     const setSegmentData = (data) => {
         segmentData = Array.isArray(data)
@@ -593,12 +604,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const finalizeSpin = (segment, fallbackLabel) => {
         const payload = pendingSpinPayload;
         pendingSpinPayload = null;
+        lastSpinId = payload?.spin?.id ?? null;
 
         const initialLabel = segment?.label ?? fallbackLabel;
         const initialImage = segment?.image ?? null;
 
         setResultState({ label: initialLabel, image: initialImage });
+        lastResultKey = segment?.key ?? null;
         updateResultBanner(segment?.key ?? null);
+        updateResultNavButtons();
         showStep('result');
         activateCelebration();
 
@@ -616,7 +630,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const bannerKey = awarded?.key ?? segment?.key ?? null;
 
         setResultState({ label: displayLabel, image });
+        lastResultKey = bannerKey;
         updateResultBanner(bannerKey);
+        updateResultNavButtons();
         renderHistory(displayLabel);
 
         if (Array.isArray(summary)) {
@@ -632,7 +648,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const resetResult = () => {
         setResultState({ label: '—', image: null });
+        lastResultKey = null;
         updateResultBanner(null);
+        updateResultNavButtons();
+    };
+
+    const isTryAgainResult = () => {
+        const normalizedKey = typeof lastResultKey === 'string' ? lastResultKey.toLowerCase() : '';
+        return Boolean(normalizedKey && hiddenBannerKeys.has(normalizedKey));
+    };
+
+    const updateResultNavButtons = () => {
+        const isWin = !isTryAgainResult();
+
+        if (resultHomeButton) {
+            resultHomeButton.style.display = isWin ? 'none' : '';
+        }
+
+        if (resultNextButton) {
+            resultNextButton.style.display = isWin ? '' : 'none';
+        }
+    };
+
+    const goToContactStep = () => {
+        if (contactErrorElement) {
+            contactErrorElement.style.display = 'none';
+            contactErrorElement.textContent = '';
+        }
+        contactForm?.reset();
+        showStep('contact');
     };
 
     const initialSegmentSource = parseJsonAttribute(wheelElement.dataset.segmentConfig, []);
@@ -655,8 +699,21 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        resetResult();
-        showStep('intro');
+        if (isTryAgainResult()) {
+            resetResult();
+            showStep('intro');
+            return;
+        }
+
+        goToContactStep();
+    });
+
+    resultNextButton?.addEventListener('click', () => {
+        if (spinning || isTryAgainResult()) {
+            return;
+        }
+
+        goToContactStep();
     });
 
     homeButtons.forEach((homeButton) => {
@@ -665,8 +722,66 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            resetResult();
             showStep('intro');
         });
+    });
+
+    contactForm?.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const name = contactNameInput?.value.trim() ?? '';
+        const phone = contactPhoneInput?.value.trim() ?? '';
+
+        if (contactErrorElement) {
+            contactErrorElement.style.display = 'none';
+            contactErrorElement.textContent = '';
+        }
+
+        if (!name || !phone) {
+            if (contactErrorElement) {
+                contactErrorElement.textContent = 'Please enter your name and phone number.';
+                contactErrorElement.style.display = 'block';
+            }
+            return;
+        }
+
+        if (!lastSpinId) {
+            resetResult();
+            showStep('intro');
+            return;
+        }
+
+        contactDoneButton?.setAttribute('disabled', 'disabled');
+
+        try {
+            const response = await fetch(`/api/spins/${lastSpinId}/contact`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({ name, phone }),
+            });
+
+            if (!response.ok) {
+                const errorPayload = await response.json().catch(() => null);
+                throw new Error(errorPayload?.message ?? 'Unable to save your details. Please try again.');
+            }
+
+            resetResult();
+            showStep('intro');
+        } catch (error) {
+            console.error('Unable to store contact details', error);
+            if (contactErrorElement) {
+                contactErrorElement.textContent = error?.message ?? 'Unable to save your details. Please try again.';
+                contactErrorElement.style.display = 'block';
+            }
+        } finally {
+            contactDoneButton?.removeAttribute('disabled');
+        }
     });
 
     spinButton.addEventListener('click', async () => {

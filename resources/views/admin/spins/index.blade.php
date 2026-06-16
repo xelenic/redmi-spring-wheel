@@ -109,6 +109,8 @@
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Requested Prize</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Awarded Prize</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Result Label</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IP Address</th>
@@ -120,7 +122,7 @@
 
                 @if($spins->count() === 0)
                     <tr>
-                        <td colspan="7" class="px-6 py-4 text-center text-gray-500">No spins found</td>
+                        <td colspan="9" class="px-6 py-4 text-center text-gray-500">No spins found</td>
                     </tr>
                 @elseif(!$isGrouped)
                     @foreach($spins as $spin)
@@ -134,6 +136,12 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                 {{ $spin->awardedPrize->display_name ?? 'N/A' }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ $spin->name ?? '—' }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ $spin->phone ?? '—' }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                 {{ $spin->result_label }}
@@ -163,7 +171,7 @@
                     @php($groups = $spins->groupBy(fn ($spin) => $spin->created_at->toDateString()))
                     @foreach($groups as $date => $items)
                         <tr class="bg-gray-50">
-                            <td colspan="7" class="px-6 py-3 text-sm font-semibold text-gray-800">
+                            <td colspan="9" class="px-6 py-3 text-sm font-semibold text-gray-800">
                                 {{ \Illuminate\Support\Carbon::parse($date)->format('M d, Y') }}
                                 <span class="ml-2 text-xs font-normal text-gray-500">({{ $items->count() }} spins on this page)</span>
                             </td>
@@ -179,6 +187,12 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                     {{ $spin->awardedPrize->display_name ?? 'N/A' }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {{ $spin->name ?? '—' }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {{ $spin->phone ?? '—' }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     {{ $spin->result_label }}

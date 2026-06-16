@@ -151,7 +151,6 @@
             position: absolute;
             inset: 0;
             border-radius: inherit;
-            background: radial-gradient(circle at 50% 20%, rgba(255, 150, 40, 0.2) 0%, transparent 50%);
             pointer-events: none;
         }
 
@@ -283,6 +282,32 @@
             height: clamp(18px, 2.4vh, 22px);
         }
 
+        .home-button--next {
+            background: none;
+            border: none;
+            box-shadow: none;
+            padding: 0;
+            width: auto;
+            height: auto;
+        }
+
+        .home-button--next img {
+            display: block;
+            width: clamp(96px, 16vh, 160px);
+            height: auto;
+        }
+
+        .home-button--next:hover,
+        .home-button--next:focus-visible {
+            transform: translateY(-2px);
+            box-shadow: none;
+        }
+
+        .home-button--next:active {
+            transform: translateY(0);
+            box-shadow: none;
+        }
+
         .intro {
             display: flex;
             flex-direction: column;
@@ -384,6 +409,18 @@
             box-shadow: none;
         }
 
+        .cta-button--image {
+            background: none;
+            padding: 0;
+            box-shadow: none;
+        }
+
+        .cta-button--image img {
+            display: block;
+            width: clamp(160px, 27vh, 260px);
+            height: auto;
+        }
+
         .cta-button--ghost {
             background: transparent;
             border: 2px solid var(--accent);
@@ -421,6 +458,81 @@
         .step--result {
             flex-direction: column;
             position: relative;
+        }
+
+        .step--contact {
+            flex-direction: column;
+            position: relative;
+        }
+
+        .contact-form {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: clamp(20px, 3vh, 32px);
+            width: clamp(560px, 82vw, 880px);
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 32px;
+            padding: clamp(36px, 5.5vh, 56px) clamp(32px, 5vh, 48px);
+        }
+
+        .contact-form__logo {
+                display: block;
+    width: 30vh;
+    margin: 0 auto;
+    position: absolute;
+    top: 10vh;
+    left: 10vh;
+        }
+
+        .contact-form__title {
+            margin: 0;
+            font-size: clamp(28px, 4.4vh, 94px);
+            font-weight: 800;
+            text-align: center;
+            color: #1a1a1a;
+        }
+
+        .contact-form__subtitle {
+            margin: 0 0 8px;
+            font-size: clamp(17px, 2.4vh, 22px);
+            text-align: center;
+            color: rgba(42, 42, 42, 0.75);
+        }
+
+        .contact-form__field {
+            display: flex;
+            flex-direction: column;
+            gap: clamp(8px, 1.2vh, 12px);
+            font-size: clamp(17px, 2.2vh, 21px);
+            color: rgba(22, 22, 22, 0.85);
+        }
+
+        .contact-form__field input {
+            appearance: none;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 16px;
+            padding: clamp(16px, 2.6vh, 22px) clamp(20px, 2.8vh, 26px);
+            font-size: clamp(18px, 2.6vh, 50px);
+            background: rgba(255, 255, 255, 0.92);
+            color: #1a1a1a;
+        }
+
+        .contact-form__field input:focus {
+            outline: 2px solid var(--brand-highlight);
+        }
+
+        .contact-form__error {
+            margin: 0;
+            color: #ff9b9b;
+            font-size: clamp(15px, 1.9vh, 18px);
+            text-align: center;
+        }
+
+        .contact-form [data-contact-done] {
+            align-self: center;
+            margin-top: clamp(4px, 1vh, 10px);
         }
 
         .result-wrapper {
@@ -803,6 +915,9 @@
                             <path d="M3 12L5 10M5 10L12 3L19 10M5 10V20C5 20.5523 5.44772 21 6 21H9M19 10L21 12M19 10V20C19 20.5523 18.5523 21 18 21H15M9 21C9.55228 21 10 20.5523 10 20V16C10 15.4477 10.4477 15 11 15H13C13.5523 15 14 15.4477 14 16V20C14 20.5523 14.4477 21 15 21M9 21H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </button>
+                    <button class="home-button home-button--next" data-result-next aria-label="Next" title="Next" style="display: none;">
+                        <img src="{{ asset('spin/01/next.png') }}" alt="Next">
+                    </button>
                     <div class="result-wrapper">
                         <img
                             src="{{ asset('spin/03/Congratulations.png') }}"
@@ -820,8 +935,36 @@
                             <span class="status-label">Recent Winners</span>
                             <ul class="history-list" data-history></ul>
                         </div>
-                        <img src="{{ asset('spin/03/03_Button.png') }}" alt="Play Again" data-repeat style="width: 27vh;margin-top: 14vh;">
+                        <img src="{{ asset('spin/01/next.png') }}" alt="Continue" data-repeat style="width: 27vh;margin-top: 14vh;">
                     </div>
+                </section>
+
+                <section class="step step--contact" data-step="contact">
+                    <button class="home-button" data-home aria-label="Home" title="Home">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M3 12L5 10M5 10L12 3L19 10M5 10V20C5 20.5523 5.44772 21 6 21H9M19 10L21 12M19 10V20C19 20.5523 18.5523 21 18 21H15M9 21C9.55228 21 10 20.5523 10 20V16C10 15.4477 10.4477 15 11 15H13C13.5523 15 14 15.4477 14 16V20C14 20.5523 14.4477 21 15 21M9 21H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <form class="contact-form" data-contact-form>
+                        <img src="{{ asset('spin/01/01_Logo.png') }}" alt="Logo" class="contact-form__logo">
+                        <h2 class="contact-form__title" style=margin: 0;
+    font-size: clamp(28px, 4.4vh, 94px);
+    font-weight: 800;
+    text-align: center;
+    color: #f26522;
+    font-family: sans-serif;">Claim Your Prize</h2>
+                        <p class="contact-form__subtitle">Enter your details to claim your prize</p>
+                        <label class="contact-form__field">
+                            <input type="text" name="name" data-contact-name placeholder="Your name" required>
+                        </label>
+                        <label class="contact-form__field">
+                            <input type="tel" name="phone" data-contact-phone placeholder="Your phone number" required>
+                        </label>
+                        <p class="contact-form__error" data-contact-error style="display: none;"></p>
+                        <button type="submit" class="cta-button cta-button--image" data-contact-done>
+                            <img src="{{ asset('spin/01/done.png') }}" alt="Done" style="width: 24vh;">
+                        </button>
+                    </form>
                 </section>
             </div>
         </div>

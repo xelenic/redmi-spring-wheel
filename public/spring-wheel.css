@@ -131,7 +131,6 @@ body {
     position: absolute;
     inset: 0;
     border-radius: inherit;
-    background: radial-gradient(circle at 50% 20%, rgba(255, 150, 40, 0.2) 0%, transparent 50%);
     pointer-events: none;
 }
 

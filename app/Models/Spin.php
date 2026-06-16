@@ -15,6 +15,8 @@ class Spin extends Model
         'awarded_prize_id',
         'issued',
         'result_label',
+        'name',
+        'phone',
         'meta',
     ];
 

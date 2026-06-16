@@ -78,6 +78,7 @@ class SpinController extends Controller
         });
 
         $payload = [
+            'spin' => ['id' => $result['spin']->id],
             'issued' => $result['issued'],
             'message' => $result['message'],
             'requested' => $this->prizePayload($result['requested']),
@@ -86,6 +87,18 @@ class SpinController extends Controller
         ];
 
         return response()->json($payload);
+    }
+
+    public function storeContact(Request $request, Spin $spin): JsonResponse
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'phone' => ['required', 'string', 'max:30'],
+        ]);
+
+        $spin->update($validated);
+
+        return response()->json(['success' => true]);
     }
 
     protected function prizePayload(?Prize $prize): ?array
