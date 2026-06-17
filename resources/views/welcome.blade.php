@@ -9,6 +9,14 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
+        @font-face {
+            font-family: 'Conthrax';
+            src: url('{{ asset('Conthrax-SemiBold.otf') }}') format('opentype');
+            font-weight: 600;
+            font-style: normal;
+            font-display: swap;
+        }
+
         /* Lucky Wheel Kiosk (9:16) */
         :root {
             color-scheme: light;
@@ -489,16 +497,18 @@
         .contact-form__title {
             margin: 0;
             font-size: clamp(28px, 4.4vh, 94px);
-            font-weight: 800;
+            font-weight: 600;
+            font-family: 'Conthrax', sans-serif;
             text-align: center;
-            color: #1a1a1a;
+            color: #f26522;
         }
 
         .contact-form__subtitle {
             margin: 0 0 8px;
             font-size: clamp(17px, 2.4vh, 22px);
+            font-family: 'Conthrax', sans-serif;
             text-align: center;
-            color: rgba(42, 42, 42, 0.75);
+            color: #f26522;
         }
 
         .contact-form__field {
@@ -947,12 +957,7 @@
                     </button>
                     <form class="contact-form" data-contact-form>
                         <img src="{{ asset('spin/01/01_Logo.png') }}" alt="Logo" class="contact-form__logo">
-                        <h2 class="contact-form__title" style=margin: 0;
-    font-size: clamp(28px, 4.4vh, 94px);
-    font-weight: 800;
-    text-align: center;
-    color: #f26522;
-    font-family: sans-serif;">Claim Your Prize</h2>
+                        <h2 class="contact-form__title">Claim Your Prize</h2>
                         <p class="contact-form__subtitle">Enter your details to claim your prize</p>
                         <label class="contact-form__field">
                             <input type="text" name="name" data-contact-name placeholder="Your name" required>
