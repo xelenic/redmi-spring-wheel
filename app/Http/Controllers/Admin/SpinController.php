@@ -61,9 +61,10 @@ class SpinController extends Controller
 
             $query->chunk(500, function ($spins) use ($handle) {
                 foreach ($spins as $spin) {
+                    $ts = $spin->created_at->setTimezone('Asia/Colombo');
                     fputcsv($handle, [
-                        $spin->created_at->format('Y-m-d'),
-                        $spin->created_at->format('H:i:s'),
+                        $ts->format('Y-m-d'),
+                        $ts->format('H:i:s'),
                         $spin->name ?? '',
                         $spin->phone ?? '',
                         $spin->requestedPrize->display_name ?? '',
