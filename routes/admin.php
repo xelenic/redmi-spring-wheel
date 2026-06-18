@@ -23,6 +23,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
 
     // Spins history
     Route::get('/spins', [SpinController::class, 'index'])->name('spins.index');
+    Route::get('/spins/export/csv', [SpinController::class, 'export'])->name('spins.export');
     Route::get('/spins/{spin}', [SpinController::class, 'show'])->name('spins.show');
 });
 

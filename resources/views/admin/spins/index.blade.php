@@ -50,6 +50,9 @@
             <a href="{{ route('admin.spins.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded">
                 <i class="fas fa-times mr-2"></i>Clear
             </a>
+            <a href="{{ route('admin.spins.export', request()->query()) }}" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded ml-auto">
+                <i class="fas fa-download mr-2"></i>Export CSV
+            </a>
         </div>
     </form>
 </div>

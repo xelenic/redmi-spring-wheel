@@ -42,6 +42,45 @@ class SpinController extends Controller
         return view('admin.spins.index', compact('spins', 'group', 'dailyStats', 'prizeOptions'));
     }
 
+    public function export(Request $request)
+    {
+        $query = Spin::query()->with(['requestedPrize', 'awardedPrize'])->latest();
+        $this->applyFilters($query, $request);
+
+        $filename = 'spin-history-' . now()->format('Y-m-d') . '.csv';
+
+        $headers = [
+            'Content-Type'        => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ];
+
+        $callback = function () use ($query) {
+            $handle = fopen('php://output', 'w');
+
+            fputcsv($handle, ['Date', 'Time', 'Name', 'Phone', 'Requested Prize', 'Awarded Prize', 'Result Label', 'Status', 'IP Address']);
+
+            $query->chunk(500, function ($spins) use ($handle) {
+                foreach ($spins as $spin) {
+                    fputcsv($handle, [
+                        $spin->created_at->format('Y-m-d'),
+                        $spin->created_at->format('H:i:s'),
+                        $spin->name ?? '',
+                        $spin->phone ?? '',
+                        $spin->requestedPrize->display_name ?? '',
+                        $spin->awardedPrize->display_name ?? '',
+                        $spin->result_label ?? '',
+                        $spin->issued ? 'Issued' : 'Not Issued',
+                        $spin->meta['ip'] ?? '',
+                    ]);
+                }
+            });
+
+            fclose($handle);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
     public function show(Spin $spin)
     {
         $spin->load(['requestedPrize', 'awardedPrize']);
